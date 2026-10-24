@@ -1,25 +1,72 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explore Resources - ShareSphere 10km Community Discovery</title>
-  <meta name="description" content="Discover free unused resources, textbooks, clothes, food, and electronics shared by neighbors within 10 km.">
-  
-  <!-- CSS Dependencies -->
+  <title>Explore Free Items - ShareSphere Community Marketplace</title>
+  <meta name="description" content="Browse free donations from your community. Books, clothes, food, electronics and more. Free to claim.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-
-  <!-- Custom ShareSphere Stylesheets -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    body{background:#f1f3f6}
+    .explore-topbar{background:var(--grad-primary);padding:.7rem 0;position:sticky;top:62px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+    .explore-search-wrap{display:flex;align-items:center;background:#fff;border-radius:2px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+    .explore-search-wrap input{flex:1;border:none;padding:.6rem 1rem;font-size:.95rem;outline:none;font-family:var(--font-main)}
+    .explore-search-wrap button{background:#f9a825;border:none;padding:.6rem 1.2rem;font-size:1.1rem;cursor:pointer;color:#333}
+    .explore-banner{background:linear-gradient(120deg,#0a2540 0%,#1a4880 40%,#0e6655 100%);color:#fff;padding:1.2rem 1.5rem;border-radius:6px;margin-bottom:1rem;position:relative;overflow:hidden;min-height:110px;display:flex;align-items:center;justify-content:space-between}
+    .explore-banner::before{content:'';position:absolute;right:-60px;top:-40px;width:220px;height:220px;background:rgba(255,255,255,.07);border-radius:50%}
+    .explore-banner h2{font-size:1.35rem;margin:0 0 .25rem;font-weight:800}
+    .explore-banner p{font-size:.82rem;margin:0;opacity:.85}
+    .donate-cta{background:#f9a825;color:#0a2540;font-weight:800;font-size:.82rem;padding:.55rem 1.25rem;border-radius:4px;text-decoration:none;white-space:nowrap;display:inline-block;transition:transform .2s}
+    .donate-cta:hover{transform:scale(1.04);background:#ffb300}
+    .category-pills-row{background:#fff;border-radius:6px;padding:.85rem 1rem;margin-bottom:1rem;display:flex;gap:.5rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .cat-pill{display:flex;flex-direction:column;align-items:center;gap:3px;background:#f8f9fa;border:2px solid transparent;border-radius:8px;padding:.6rem .9rem;cursor:pointer;font-size:.7rem;font-weight:700;color:#333;transition:all .2s;min-width:68px;text-align:center}
+    .cat-pill .pill-icon{font-size:1.5rem;line-height:1}
+    .cat-pill:hover,.cat-pill.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
+    .sort-filter-bar{background:#fff;border-radius:6px;padding:.6rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;font-size:.82rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .sort-filter-bar label{color:#555;font-weight:600;white-space:nowrap}
+    .sort-filter-bar select{border:1px solid #ddd;border-radius:4px;padding:.3rem .6rem;font-size:.82rem;background:#fafafa;cursor:pointer}
+    .sort-filter-bar .divider{color:#ddd}
+    .count-badge-bar{margin-left:auto;font-weight:700;color:#333}
+    .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:#e8e8e8;border-radius:6px;overflow:hidden}
+    .product-card{background:#fff;cursor:pointer;transition:box-shadow .2s;position:relative;display:flex;flex-direction:column}
+    .product-card:hover{z-index:2;box-shadow:0 8px 30px rgba(0,0,0,.16)}
+    .product-card-img-wrap{position:relative;overflow:hidden;background:#f8f9fa;aspect-ratio:1/1}
+    .product-card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+    .product-card:hover .product-card-img-wrap img{transform:scale(1.07)}
+    .product-card-body{padding:.75rem .85rem .9rem;flex:1;display:flex;flex-direction:column}
+    .product-card-title{font-size:.88rem;font-weight:600;color:#212121;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .product-card-meta{font-size:.74rem;color:#878787;margin-bottom:6px}
+    .product-card-location{font-size:.75rem;color:#555}
+    .product-card-location i{color:var(--primary)}
+    .product-card-badge-free{position:absolute;top:8px;left:8px;background:var(--primary);color:white;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px}
+    .product-card-cat-icon{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.95rem;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+    .product-wishlist-btn{position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,.92);border:none;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.12);color:#aaa}
+    .product-wishlist-btn:hover,.product-wishlist-btn.active{color:#e53935}
+    .product-card-donor{display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:8px;border-top:1px solid #f5f5f5}
+    .product-card-donor img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+    .product-card-donor-name{font-size:.72rem;color:#666;font-weight:600}
+    .product-card-btn{display:block;background:#ff6161;color:white;text-align:center;font-size:.78rem;font-weight:700;padding:.45rem;text-decoration:none;transition:background .2s;letter-spacing:.3px}
+    .product-card-btn:hover{background:#e53935;color:white}
+    .product-card-btn.primary-btn{background:var(--primary)}
+    .product-card-btn.primary-btn:hover{background:var(--primary-dark)}
+    .status-chip{display:inline-block;font-size:.63rem;font-weight:800;padding:1px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px}
+    .status-chip.available{background:#e8f5e9;color:#2e7d32}
+    .cond-badge{font-size:.68rem;padding:2px 6px;border-radius:3px;background:#e3f2fd;color:#0277bd;font-weight:600}
+    .explore-empty{background:#fff;border-radius:6px;padding:4rem 2rem;text-align:center}
+    .explore-empty-icon{font-size:4rem;margin-bottom:1rem;display:block}
+    #exploreMap{height:420px;border-radius:8px}
+    .section-title-amazon{font-size:1.1rem;font-weight:800;color:#212121;border-left:4px solid var(--primary);padding-left:10px;margin:.5rem 0 1rem}
+    .quick-filter-chip{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);cursor:pointer;transition:all .15s;color:#fff;text-decoration:none}
+    .quick-filter-chip:hover,.quick-filter-chip.active{background:rgba(255,255,255,.3);border-color:#fff}
+    @media(max-width:768px){.product-grid{grid-template-columns:repeat(2,1fr)}.explore-banner h2{font-size:1rem}.explore-topbar{top:56px}}
+  </style>
 </head>
 <body>
-
-
-  <!-- Global Navigation Bar -->
   <nav class="navbar navbar-expand-lg sharesphere-navbar">
     <div class="container">
       <a class="navbar-brand" href="index.html">
@@ -27,11 +74,9 @@
         <span class="brand-name">ShareSphere</span>
         <span class="brand-tag">Free Sharing</span>
       </a>
-
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
         <span class="navbar-toggler-icon"></span>
       </button>
-
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Home</a></li>
@@ -41,198 +86,116 @@
           <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
           <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
         </ul>
-
         <div id="navbar-auth-section" class="d-flex align-items-center gap-2"></div>
       </div>
     </div>
   </nav>
 
-  <!-- Explore Header & Search Filter Card -->
-  <header class="py-4" style="background: radial-gradient(circle at 10% 20%, rgba(209, 250, 229, 0.4) 0%, rgba(248, 250, 252, 0.9) 100%); border-bottom: 1px solid var(--border);">
+  <div class="explore-topbar">
     <div class="container">
-      <div class="row align-items-center mb-3">
-        <div class="col-md-8">
-          <h2 class="section-title mb-1">Discover Community Resources</h2>
-          <p class="text-muted mb-0">Browse through available free items within your 10 km local radius.</p>
-        </div>
-        <div class="col-md-4 text-md-end mt-2 mt-md-0">
-          <button class="btn btn-sm btn-outline-primary-custom" id="btn-use-gps">
-            <i class="bi bi-crosshair text-primary"></i> 📍 Use My Current Location
-          </button>
-        </div>
-      </div>
-
-      <!-- Modern Search & Filter Panel -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-        <!-- Search Bar -->
-        <div class="input-group mb-3">
-          <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3">
-            <i class="bi bi-search text-muted"></i>
-          </span>
-          <input type="text" id="explore-search-input" class="form-control bg-light border-start-0 rounded-end-pill py-2" placeholder="Search for books, clothes, electronics, bread, toys, furniture...">
-        </div>
-
-        <!-- Filters Row -->
-        <div class="row g-2">
-          <div class="col-md-3 col-6">
-            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-grid"></i> Category</label>
-            <select id="filter-category" class="form-select form-select-sm rounded-3">
-              <option value="All">All Categories</option>
-              <option value="Food">🍎 Food</option>
-              <option value="Clothes">👕 Clothes</option>
-              <option value="Books">📚 Books</option>
-              <option value="Electronics">💻 Electronics</option>
-              <option value="Furniture">🪑 Furniture</option>
-              <option value="Toys">🧸 Toys</option>
-              <option value="Other">📦 Other</option>
-            </select>
-          </div>
-
-          <div class="col-md-2 col-6">
-            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-radar"></i> Radius</label>
-            <select id="filter-distance" class="form-select form-select-sm rounded-3">
-              <option value="2">Within 2 km</option>
-              <option value="5">Within 5 km</option>
-              <option value="10" selected>Within 10 km (Core)</option>
-              <option value="all">Any distance</option>
-            </select>
-          </div>
-
-          <div class="col-md-2 col-6">
-            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-stars"></i> Condition</label>
-            <select id="filter-condition" class="form-select form-select-sm rounded-3">
-              <option value="All">All Conditions</option>
-              <option value="Fresh / New">Fresh / New</option>
-              <option value="Like New">Like New</option>
-              <option value="Good Condition">Good Condition</option>
-              <option value="Fair Condition">Fair Condition</option>
-            </select>
-          </div>
-
-          <div class="col-md-2 col-6">
-            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-check-circle"></i> Availability</label>
-            <select id="filter-availability" class="form-select form-select-sm rounded-3">
-              <option value="Available" selected>Available Now</option>
-              <option value="All">All Items</option>
-            </select>
-          </div>
-
-          <div class="col-md-3 col-12">
-            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-sort-down"></i> Sort By</label>
-            <select id="filter-sort" class="form-select form-select-sm rounded-3">
-              <option value="nearest" selected>📍 Nearest to Me First</option>
-              <option value="newest">🕒 Recently Shared First</option>
-              <option value="rating">⭐ Highest Rated Donor</option>
-            </select>
-          </div>
-        </div>
+      <div class="explore-search-wrap">
+        <i class="bi bi-search" style="padding:0 .75rem;color:#555;font-size:1rem;"></i>
+        <input type="text" id="explore-search-input" placeholder="Search books, clothes, food, electronics, furniture...">
+        <button type="button" id="btn-search-go"><i class="bi bi-search"></i></button>
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- Main Explore Content -->
-  <main class="py-4">
+  <main class="py-3">
     <div class="container">
-      <!-- View Mode Controls (Grid vs Map View) -->
-      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="fw-bold text-dark" id="explore-results-count">Loading resources...</span>
-          <span class="badge bg-success-subtle text-success">10 km Zone Active</span>
+      <div class="explore-banner">
+        <div>
+          <h2>🎁 Everything is FREE Here!</h2>
+          <p>Claim donated items from your neighbours. Zero cost, 100% goodwill.</p>
+          <div class="mt-2 d-flex gap-2 flex-wrap">
+            <span class="quick-filter-chip active" data-qf="all"><i class="bi bi-grid"></i> All Items</span>
+            <span class="quick-filter-chip" data-qf="newest"><i class="bi bi-clock"></i> Just Added</span>
+            <span class="quick-filter-chip" data-qf="Food"><i class="bi bi-egg-fried"></i> Food</span>
+            <span class="quick-filter-chip" data-qf="Electronics"><i class="bi bi-laptop"></i> Electronics</span>
+          </div>
         </div>
-
-        <div class="btn-group shadow-sm rounded-pill overflow-hidden" role="group">
-          <button type="button" class="btn btn-sm btn-outline-secondary active px-3" data-view-toggle="grid">
-            <i class="bi bi-grid-3x3-gap-fill"></i> Grid View
-          </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-view-toggle="map">
-            <i class="bi bi-map-fill"></i> Interactive Map
-          </button>
-        </div>
+        <a href="donate.html" class="donate-cta d-none d-md-inline-block">+ Share Something</a>
       </div>
 
-      <!-- Grid View Container -->
-      <div class="row" id="explore-grid-view">
-        <div class="row g-4" id="explore-resources-container">
-          <!-- Rendered dynamically by explore.js -->
-        </div>
+      <div class="category-pills-row" id="category-pills">
+        <div class="cat-pill active" data-cat="All"><span class="pill-icon">🏪</span><span>All</span></div>
+        <div class="cat-pill" data-cat="Food"><span class="pill-icon">🍎</span><span>Food</span></div>
+        <div class="cat-pill" data-cat="Clothes"><span class="pill-icon">👕</span><span>Clothes</span></div>
+        <div class="cat-pill" data-cat="Books"><span class="pill-icon">📚</span><span>Books</span></div>
+        <div class="cat-pill" data-cat="Electronics"><span class="pill-icon">💻</span><span>Electronics</span></div>
+        <div class="cat-pill" data-cat="Furniture"><span class="pill-icon">🪑</span><span>Furniture</span></div>
+        <div class="cat-pill" data-cat="Toys"><span class="pill-icon">🧸</span><span>Toys</span></div>
+        <div class="cat-pill" data-cat="Other"><span class="pill-icon">📦</span><span>Other</span></div>
       </div>
 
-      <!-- Map View Container (Leaflet) -->
-      <div id="explore-map-view" style="display: none;" class="mb-5">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden p-2 bg-white">
-          <div class="p-2 mb-2 d-flex align-items-center justify-content-between small text-muted">
-            <div><i class="bi bi-info-circle-fill text-primary"></i> Showing all community resources within your <b>10 km green circle</b>. Click any pin to inspect details.</div>
+      <div class="sort-filter-bar">
+        <label><i class="bi bi-funnel"></i> Filter:</label>
+        <select id="filter-condition">
+          <option value="All">All Conditions</option>
+          <option value="Fresh / New">Fresh / New</option>
+          <option value="Like New">Like New</option>
+          <option value="Good Condition">Good Condition</option>
+          <option value="Fair Condition">Fair Condition</option>
+        </select>
+        <select id="filter-availability">
+          <option value="Available" selected>Available Now</option>
+          <option value="All">All Items</option>
+        </select>
+        <span class="divider">|</span>
+        <label><i class="bi bi-sort-down"></i> Sort:</label>
+        <select id="filter-sort">
+          <option value="newest" selected>🕒 Newest First</option>
+          <option value="nearest">📍 Nearest First</option>
+          <option value="popular">🔥 Most Requested</option>
+          <option value="rating">⭐ Top Rated Donors</option>
+        </select>
+        <span class="divider d-none d-md-inline">|</span>
+        <button class="btn btn-sm btn-outline-secondary d-none d-md-flex align-items-center gap-1" id="btn-map-toggle">
+          <i class="bi bi-map-fill"></i> Map View
+        </button>
+        <span class="count-badge-bar" id="explore-results-count">Loading...</span>
+      </div>
+
+      <div id="explore-grid-view">
+        <div class="product-grid" id="explore-resources-container"></div>
+      </div>
+
+      <div id="explore-map-view" style="display:none;">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+          <div class="p-2 d-flex align-items-center justify-content-between small text-muted border-bottom">
+            <div><i class="bi bi-info-circle-fill text-primary"></i> Click any pin to view item details.</div>
             <div class="d-flex align-items-center gap-2">
-              <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #2563EB;"></span> You
-              <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #10B981;"></span> Donated Items
+              <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:#2563EB;"></span> You
+              <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:#10B981;"></span> Items
             </div>
           </div>
           <div id="exploreMap"></div>
         </div>
       </div>
 
-      <!-- Smart Recommendations Section -->
-      <section class="mt-5 pt-4 border-top" id="smart-recommendations-wrapper">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <div>
-            <span class="section-tag mb-1"><i class="bi bi-stars"></i> Smart Matching</span>
-            <h4 class="fw-bold text-dark mb-0">Recommended For You</h4>
-            <p class="small text-muted mb-0">High-utility resources near your location based on community popularity.</p>
-          </div>
-        </div>
-        <div class="row" id="smart-recommendations-container">
-          <!-- Rendered dynamically by explore.js -->
-        </div>
-      </section>
+      <div class="mt-4" id="trending-section">
+        <h5 class="section-title-amazon">🔥 Popular Right Now</h5>
+        <div class="product-grid" id="trending-container"></div>
+      </div>
     </div>
   </main>
 
-  <!-- Mobile Bottom Navigation Bar -->
   <nav class="mobile-bottom-nav">
     <ul class="mobile-nav-items">
-      <li>
-        <a href="index.html" class="mobile-nav-link">
-          <i class="bi bi-house-door-fill"></i>
-          <span>Home</span>
-        </a>
-      </li>
-      <li>
-        <a href="explore.html" class="mobile-nav-link active">
-          <i class="bi bi-compass-fill"></i>
-          <span>Explore</span>
-        </a>
-      </li>
-      <li>
-        <a href="donate.html" class="mobile-nav-donate-pill" title="Donate">
-          <i class="bi bi-plus-lg"></i>
-        </a>
-      </li>
-      <li>
-        <a href="wishlist.html" class="mobile-nav-link">
-          <i class="bi bi-heart-fill"></i>
-          <span>Saved</span>
-        </a>
-      </li>
-      <li>
-        <a href="profile.html" class="mobile-nav-link">
-          <i class="bi bi-person-fill"></i>
-          <span>Profile</span>
-        </a>
-      </li>
+      <li><a href="index.html" class="mobile-nav-link"><i class="bi bi-house-door-fill"></i><span>Home</span></a></li>
+      <li><a href="explore.html" class="mobile-nav-link active"><i class="bi bi-compass-fill"></i><span>Explore</span></a></li>
+      <li><a href="donate.html" class="mobile-nav-donate-pill" title="Donate"><i class="bi bi-plus-lg"></i></a></li>
+      <li><a href="wishlist.html" class="mobile-nav-link"><i class="bi bi-heart-fill"></i><span>Saved</span></a></li>
+      <li><a href="profile.html" class="mobile-nav-link"><i class="bi bi-person-fill"></i><span>Profile</span></a></li>
     </ul>
   </nav>
 
-  <!-- JS Dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-
-  <!-- Firebase Official SDK (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-
-  <!-- ShareSphere Core Scripts -->
   <script src="js/firebase-config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>

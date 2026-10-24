@@ -1,140 +1,144 @@
-/**
- * ShareSphere - Explore Page: Search, Filters, Map View, & Smart Recommendations
+﻿/**
+ * ShareSphere - Explore Page: Amazon/Flipkart Style with Fixed Filtering
+ * ALL donations from ALL users are visible (no distance restriction by default)
  */
 
 let currentExploreMap = null;
 let mapMarkersGroup = null;
 let mapRadiusCircle = null;
+let activeCategory = 'All';
+let mapVisible = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   initExploreParams();
+  setupCategoryPills();
+  setupQuickFilters();
   setupFilterListeners();
+  setupMapToggle();
   renderExploreResources();
-  renderSmartRecommendations();
+  renderTrending();
 });
 
 /**
- * Read query string params (e.g. ?category=Books or ?q=laptop)
+ * Read query string params
  */
 function initExploreParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const cat = urlParams.get('category');
   const q = urlParams.get('q');
+  if (cat) { activeCategory = cat; highlightPill(cat); }
+  if (q) { const el = document.getElementById('explore-search-input'); if (el) el.value = q; }
+}
 
-  if (cat) {
-    const catSelect = document.getElementById('filter-category');
-    if (catSelect) catSelect.value = cat;
-  }
-  if (q) {
-    const searchInput = document.getElementById('explore-search-input');
-    if (searchInput) searchInput.value = q;
-  }
+/**
+ * Category pill click handlers
+ */
+function setupCategoryPills() {
+  document.querySelectorAll('.cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      activeCategory = pill.getAttribute('data-cat') || 'All';
+      highlightPill(activeCategory);
+      renderExploreResources();
+    });
+  });
+}
+
+function highlightPill(cat) {
+  document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+  const target = document.querySelector('.cat-pill[data-cat="' + cat + '"]');
+  if (target) target.classList.add('active');
+}
+
+/**
+ * Quick filter chips inside banner
+ */
+function setupQuickFilters() {
+  document.querySelectorAll('[data-qf]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('[data-qf]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const qf = chip.getAttribute('data-qf');
+      const sortEl = document.getElementById('filter-sort');
+      if (qf === 'newest') { if (sortEl) sortEl.value = 'newest'; activeCategory = 'All'; highlightPill('All'); }
+      else if (qf === 'all') { activeCategory = 'All'; highlightPill('All'); }
+      else { activeCategory = qf; highlightPill(qf); }
+      renderExploreResources();
+    });
+  });
 }
 
 /**
  * Filter change listeners
  */
 function setupFilterListeners() {
-  const inputs = [
-    'explore-search-input',
-    'filter-category',
-    'filter-distance',
-    'filter-condition',
-    'filter-availability',
-    'filter-sort'
-  ];
-
-  inputs.forEach(id => {
+  ['explore-search-input','filter-condition','filter-availability','filter-sort'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('input', () => renderExploreResources());
       el.addEventListener('change', () => renderExploreResources());
     }
   });
-
-  // GPS Refresh button
-  const gpsBtn = document.getElementById('btn-use-gps');
-  if (gpsBtn) {
-    gpsBtn.addEventListener('click', async () => {
-      gpsBtn.disabled = true;
-      gpsBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Locating...';
-      await window.ShareSphereLocation.requestCurrentPosition();
-      gpsBtn.disabled = false;
-      gpsBtn.innerHTML = '<i class="bi bi-crosshair text-primary"></i> GPS Updated';
-      renderExploreResources();
-    });
-  }
-
-  // Toggle Map / Grid View
-  const viewToggleBtns = document.querySelectorAll('[data-view-toggle]');
-  viewToggleBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      viewToggleBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const view = btn.getAttribute('data-view-toggle');
-      toggleExploreView(view);
-    });
-  });
-}
-
-function toggleExploreView(view) {
-  const gridContainer = document.getElementById('explore-grid-view');
-  const mapContainer = document.getElementById('explore-map-view');
-
-  if (view === 'map') {
-    gridContainer.style.display = 'none';
-    mapContainer.style.display = 'block';
-    setTimeout(() => initOrUpdateMap(), 150);
-  } else {
-    gridContainer.style.display = 'flex';
-    mapContainer.style.display = 'none';
-  }
+  const searchBtn = document.getElementById('btn-search-go');
+  if (searchBtn) searchBtn.addEventListener('click', () => renderExploreResources());
 }
 
 /**
- * Execute Filter & Sorting Pipeline
+ * Map toggle
+ */
+function setupMapToggle() {
+  const btn = document.getElementById('btn-map-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    mapVisible = !mapVisible;
+    const grid = document.getElementById('explore-grid-view');
+    const mapDiv = document.getElementById('explore-map-view');
+    if (mapVisible) {
+      grid.style.display = 'none';
+      mapDiv.style.display = 'block';
+      btn.innerHTML = '<i class="bi bi-grid-3x3-gap-fill"></i> Grid View';
+      setTimeout(() => initOrUpdateMap(), 150);
+    } else {
+      grid.style.display = 'block';
+      mapDiv.style.display = 'none';
+      btn.innerHTML = '<i class="bi bi-map-fill"></i> Map View';
+    }
+  });
+}
+
+/**
+ * Core filter pipeline — NO distance restriction by default (shows all)
  */
 function getFilteredResources() {
   const searchVal = (document.getElementById('explore-search-input')?.value || '').toLowerCase().trim();
-  const categoryVal = document.getElementById('filter-category')?.value || 'All';
-  const distanceVal = document.getElementById('filter-distance')?.value || '10'; // default 10km radius
   const conditionVal = document.getElementById('filter-condition')?.value || 'All';
-  const availabilityVal = document.getElementById('filter-availability')?.value || 'All';
-  const sortVal = document.getElementById('filter-sort')?.value || 'nearest';
-
+  const availabilityVal = document.getElementById('filter-availability')?.value || 'Available';
+  const sortVal = document.getElementById('filter-sort')?.value || 'newest';
   const userLoc = window.ShareSphereLocation.getUserLocation();
+
   let donations = window.ShareSphereDB.getCollection('donations');
 
-  // Calculate distance for all items
+  // Attach distance for display (does NOT filter on it unless user sets GPS sort)
   donations = donations.map(item => ({
     ...item,
     calculatedDistanceKm: window.ShareSphereUtils.calculateDistanceKm(
-      userLoc.lat,
-      userLoc.lng,
-      item.latitude,
-      item.longitude
+      userLoc.lat, userLoc.lng, item.latitude, item.longitude
     )
   }));
 
   // Keyword search
   if (searchVal) {
     donations = donations.filter(d =>
-      d.title.toLowerCase().includes(searchVal) ||
-      d.description.toLowerCase().includes(searchVal) ||
-      d.category.toLowerCase().includes(searchVal) ||
-      (d.location && d.location.toLowerCase().includes(searchVal))
+      (d.title || '').toLowerCase().includes(searchVal) ||
+      (d.description || '').toLowerCase().includes(searchVal) ||
+      (d.category || '').toLowerCase().includes(searchVal) ||
+      (d.location || '').toLowerCase().includes(searchVal) ||
+      (d.donorName || '').toLowerCase().includes(searchVal)
     );
   }
 
   // Category
-  if (categoryVal !== 'All') {
-    donations = donations.filter(d => d.category === categoryVal);
-  }
-
-  // Distance filter
-  if (distanceVal !== 'all') {
-    const maxKm = parseFloat(distanceVal);
-    donations = donations.filter(d => d.calculatedDistanceKm <= maxKm);
+  if (activeCategory && activeCategory !== 'All') {
+    donations = donations.filter(d => d.category === activeCategory);
   }
 
   // Condition
@@ -152,6 +156,8 @@ function getFilteredResources() {
     donations.sort((a, b) => a.calculatedDistanceKm - b.calculatedDistanceKm);
   } else if (sortVal === 'newest') {
     donations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sortVal === 'popular') {
+    donations.sort((a, b) => (b.requestsCount || 0) - (a.requestsCount || 0));
   } else if (sortVal === 'rating') {
     donations.sort((a, b) => (b.donorRating || 0) - (a.donorRating || 0));
   }
@@ -160,7 +166,7 @@ function getFilteredResources() {
 }
 
 /**
- * Render items in Grid View
+ * Render product cards in Flipkart/Amazon grid style
  */
 function renderExploreResources() {
   const container = document.getElementById('explore-resources-container');
@@ -171,45 +177,103 @@ function renderExploreResources() {
   const userLoc = window.ShareSphereLocation.getUserLocation();
 
   if (countBadge) {
-    countBadge.textContent = `${items.length} ${items.length === 1 ? 'Resource' : 'Resources'} Found`;
+    countBadge.textContent = items.length + ' ' + (items.length === 1 ? 'item' : 'items') + ' found';
   }
 
   if (items.length === 0) {
-    container.innerHTML = `
-      <div class="col-12">
-        <div class="empty-state-box">
-          <span class="empty-state-icon">🔍</span>
-          <h4 class="empty-state-title">No resources matched your filters</h4>
-          <p class="empty-state-text">Try expanding your search distance (e.g. up to 10 km) or selecting "All Categories".</p>
-          <button class="btn btn-secondary-custom" onclick="resetExploreFilters()">
-            <i class="bi bi-arrow-counterclockwise"></i> Reset Filters
-          </button>
-        </div>
-      </div>
-    `;
+    container.innerHTML = '<div style="grid-column:1/-1;"><div class="explore-empty"><span class="explore-empty-icon">🔍</span><h5 style="color:#333;font-weight:700;">No items match your filters</h5><p style="color:#666;font-size:0.9rem;">Try a different category or clear your search.</p><button class="btn btn-sm" style="background:var(--primary);color:#fff;border-radius:4px;padding:6px 18px;" onclick="resetExploreFilters()">Clear Filters</button></div></div>';
     return;
   }
 
-  container.innerHTML = items.map(item => window.ShareSphereUtils.renderResourceCard(item, userLoc)).join('');
+  container.innerHTML = items.map(item => renderProductCard(item, userLoc)).join('');
 
-  // If map is currently active, update markers
-  if (currentExploreMap && document.getElementById('explore-map-view').style.display !== 'none') {
+  if (mapVisible && currentExploreMap) {
     updateMapMarkers(items);
   }
 }
 
+/**
+ * Flipkart/Amazon style product card
+ */
+function renderProductCard(item, userLoc) {
+  const meta = window.ShareSphereUtils.getCategoryMeta(item.category);
+  const dist = userLoc
+    ? window.ShareSphereUtils.calculateDistanceKm(userLoc.lat, userLoc.lng, item.latitude, item.longitude)
+    : null;
+  const isSaved = window.ShareSphereUtils.isInWishlist(item.id);
+  const imgUrl = (item.imageUrls && item.imageUrls[0]) || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=600&q=80';
+  const stars = '★'.repeat(Math.round(item.donorRating || 5)) + '☆'.repeat(5 - Math.round(item.donorRating || 5));
+  const distStr = dist !== null ? window.ShareSphereUtils.formatDistance(dist) : '';
+  const statusClass = (item.status || '').toLowerCase();
+  const timeAgo = window.ShareSphereUtils.timeAgo(item.createdAt);
+
+  return '<div class="product-card">' +
+    '<div class="product-card-img-wrap">' +
+      '<img src="' + imgUrl + '" alt="' + (item.title || '') + '" loading="lazy" onclick="window.location.href=\'donation-details.html?id=' + item.id + '\'">' +
+      '<span class="product-card-badge-free">FREE</span>' +
+      '<span class="product-card-cat-icon">' + meta.icon + '</span>' +
+      '<button class="product-wishlist-btn ' + (isSaved ? 'active' : '') + '" title="Save" onclick="window.ShareSphereUtils.toggleWishlist(\'' + item.id + '\'); this.classList.toggle(\'active\'); this.innerHTML=this.classList.contains(\'active\') ? \'<i class=\\\"bi bi-heart-fill\\\"></i>\' : \'<i class=\\\"bi bi-heart\\\"></i>\'">' +
+        '<i class="bi ' + (isSaved ? 'bi-heart-fill' : 'bi-heart') + '"></i>' +
+      '</button>' +
+    '</div>' +
+    '<div class="product-card-body">' +
+      '<div class="product-card-title" onclick="window.location.href=\'donation-details.html?id=' + item.id + '\'">' + (item.title || 'Item') + '</div>' +
+      '<div class="product-card-meta d-flex align-items-center gap-2 flex-wrap">' +
+        '<span class="cond-badge">' + (item.condition || '') + '</span>' +
+        '<span class="status-chip ' + statusClass + '">' + (item.status || '') + '</span>' +
+        (item.quantity > 1 ? '<span style="font-size:0.7rem;color:#666;">Qty: ' + item.quantity + '</span>' : '') +
+      '</div>' +
+      '<div class="product-card-location mb-2">' +
+        '<i class="bi bi-geo-alt-fill"></i> ' + (item.location || 'Community Area') +
+        (distStr ? ' &bull; <span style="color:var(--primary);font-weight:600;">' + distStr + '</span>' : '') +
+        '<span style="color:#aaa;margin-left:6px;font-size:0.7rem;">' + timeAgo + '</span>' +
+      '</div>' +
+      '<div class="product-card-donor">' +
+        '<img src="' + (item.donorAvatar || 'https://i.pravatar.cc/150?img=1') + '" alt="' + (item.donorName || '') + '" onerror="this.src=\'https://i.pravatar.cc/150?img=1\'">' +
+        '<div>' +
+          '<div class="product-card-donor-name">' + (item.donorName || 'Community Donor') + '</div>' +
+          '<div class="product-card-rating" style="color:#f9a825;font-size:0.68rem;">' + stars + ' ' + (item.donorRating || '5.0') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<a href="donation-details.html?id=' + item.id + '" class="product-card-btn primary-btn">VIEW &amp; REQUEST &rarr;</a>' +
+  '</div>';
+}
+
 function resetExploreFilters() {
-  document.getElementById('explore-search-input').value = '';
-  document.getElementById('filter-category').value = 'All';
-  document.getElementById('filter-distance').value = '10';
-  document.getElementById('filter-condition').value = 'All';
-  document.getElementById('filter-availability').value = 'All';
-  document.getElementById('filter-sort').value = 'nearest';
+  const si = document.getElementById('explore-search-input');
+  if (si) si.value = '';
+  const fc = document.getElementById('filter-condition');
+  if (fc) fc.value = 'All';
+  const fa = document.getElementById('filter-availability');
+  if (fa) fa.value = 'Available';
+  const fs = document.getElementById('filter-sort');
+  if (fs) fs.value = 'newest';
+  activeCategory = 'All';
+  highlightPill('All');
   renderExploreResources();
 }
 
 /**
- * Initialize Leaflet Map
+ * Trending / Popular items (top 6 by requestsCount)
+ */
+function renderTrending() {
+  const container = document.getElementById('trending-container');
+  const section = document.getElementById('trending-section');
+  if (!container) return;
+
+  const userLoc = window.ShareSphereLocation.getUserLocation();
+  const all = window.ShareSphereDB.getCollection('donations')
+    .filter(d => d.status === 'Available')
+    .sort((a, b) => (b.requestsCount || 0) - (a.requestsCount || 0))
+    .slice(0, 6);
+
+  if (all.length === 0) { if (section) section.style.display = 'none'; return; }
+  container.innerHTML = all.map(item => renderProductCard(item, userLoc)).join('');
+}
+
+/**
+ * Leaflet Map
  */
 function initOrUpdateMap() {
   const userLoc = window.ShareSphereLocation.getUserLocation();
@@ -217,41 +281,28 @@ function initOrUpdateMap() {
   if (!mapElement || typeof L === 'undefined') return;
 
   if (!currentExploreMap) {
-    currentExploreMap = L.map('exploreMap').setView([userLoc.lat, userLoc.lng], 13);
-
-    // OpenStreetMap modern tile layer
+    currentExploreMap = L.map('exploreMap').setView([userLoc.lat, userLoc.lng], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(currentExploreMap);
-
     mapMarkersGroup = L.layerGroup().addTo(currentExploreMap);
   } else {
-    currentExploreMap.setView([userLoc.lat, userLoc.lng], 13);
+    currentExploreMap.setView([userLoc.lat, userLoc.lng], 12);
   }
 
-  // Draw 10km radius circle around user
-  if (mapRadiusCircle) {
-    currentExploreMap.removeLayer(mapRadiusCircle);
-  }
-
+  if (mapRadiusCircle) currentExploreMap.removeLayer(mapRadiusCircle);
   mapRadiusCircle = L.circle([userLoc.lat, userLoc.lng], {
-    color: '#10B981',
-    fillColor: '#10B981',
-    fillOpacity: 0.12,
-    radius: 10000 // 10 km in meters
+    color: '#10B981', fillColor: '#10B981', fillOpacity: 0.08, radius: 10000
   }).addTo(currentExploreMap);
 
-  // User location marker
-  const userMarkerIcon = L.divIcon({
+  const userIcon = L.divIcon({
     className: 'user-loc-div-icon',
     html: '<div class="user-location-marker"></div>',
-    iconSize: [22, 22],
-    iconAnchor: [11, 11]
+    iconSize: [22, 22], iconAnchor: [11, 11]
   });
-
-  L.marker([userLoc.lat, userLoc.lng], { icon: userMarkerIcon })
+  L.marker([userLoc.lat, userLoc.lng], { icon: userIcon })
     .addTo(currentExploreMap)
-    .bindPopup('<b>📍 Your Community Location</b><br>10 km Resource Discovery Zone');
+    .bindPopup('<b>📍 Your Location</b>');
 
   const items = getFilteredResources();
   updateMapMarkers(items);
@@ -260,59 +311,17 @@ function initOrUpdateMap() {
 function updateMapMarkers(items) {
   if (!mapMarkersGroup || !currentExploreMap) return;
   mapMarkersGroup.clearLayers();
-
   items.forEach(item => {
+    if (!item.latitude || !item.longitude) return;
     const meta = window.ShareSphereUtils.getCategoryMeta(item.category);
-    const markerIcon = L.divIcon({
+    const icon = L.divIcon({
       className: 'custom-leaflet-marker',
-      html: `<div class="custom-map-marker" title="${item.title}">${meta.icon}</div>`,
-      iconSize: [38, 38],
-      iconAnchor: [19, 19]
+      html: '<div class="custom-map-marker" title="' + item.title + '">' + meta.icon + '</div>',
+      iconSize: [38, 38], iconAnchor: [19, 19]
     });
-
-    const popupHtml = `
-      <div style="max-width: 200px; font-family: system-ui, sans-serif;">
-        <img src="${(item.imageUrls && item.imageUrls[0]) || ''}" style="width: 100%; height: 90px; object-fit: cover; border-radius: 8px; margin-bottom: 6px;">
-        <h6 style="font-weight: 700; margin: 0 0 4px; font-size: 0.85rem; line-height: 1.2;">${item.title}</h6>
-        <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 6px;">
-          📍 ${window.ShareSphereUtils.formatDistance(item.calculatedDistanceKm)}<br>
-          <span class="badge bg-success" style="font-size: 0.65rem;">${item.condition}</span>
-        </div>
-        <a href="donation-details.html?id=${item.id}" class="btn btn-sm btn-primary w-100" style="font-size: 0.72rem; padding: 0.25rem 0.5rem;">
-          View Resource
-        </a>
-      </div>
-    `;
-
-    L.marker([item.latitude, item.longitude], { icon: markerIcon })
+    const img = (item.imageUrls && item.imageUrls[0]) || '';
+    L.marker([item.latitude, item.longitude], { icon })
       .addTo(mapMarkersGroup)
-      .bindPopup(popupHtml);
+      .bindPopup('<div style="max-width:180px;font-family:system-ui"><img src="' + img + '" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px"><h6 style="font-weight:700;margin:0 0 4px;font-size:0.82rem">' + item.title + '</h6><div style="font-size:0.72rem;color:#666;margin-bottom:6px">' + (item.location || '') + '</div><a href="donation-details.html?id=' + item.id + '" style="display:block;background:#10B981;color:#fff;text-align:center;border-radius:4px;padding:4px 0;font-size:0.75rem;text-decoration:none;font-weight:700">View Details</a></div>');
   });
-}
-
-/**
- * Smart Recommendations
- */
-function renderSmartRecommendations() {
-  const container = document.getElementById('smart-recommendations-container');
-  if (!container) return;
-
-  const userLoc = window.ShareSphereLocation.getUserLocation();
-  const all = window.ShareSphereDB.getCollection('donations').filter(d => d.status === 'Available');
-
-  // Simple explainable rule: Select top available resources within 5 km
-  const recommended = all
-    .map(d => ({
-      ...d,
-      dist: window.ShareSphereUtils.calculateDistanceKm(userLoc.lat, userLoc.lng, d.latitude, d.longitude)
-    }))
-    .filter(d => d.dist <= 5.0)
-    .slice(0, 3);
-
-  if (recommended.length === 0) {
-    container.parentElement.style.display = 'none';
-    return;
-  }
-
-  container.innerHTML = recommended.map(item => window.ShareSphereUtils.renderResourceCard(item, userLoc)).join('');
 }
