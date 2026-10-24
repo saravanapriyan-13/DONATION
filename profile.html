@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - ShareSphere</title>
+  <meta name="description" content="View your impact points, community trust badges, active donations, and edit all profile details.">
+  
+  <!-- CSS Dependencies -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom ShareSphere Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Global Navigation Bar -->
+  <nav class="navbar navbar-expand-lg sharesphere-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
+        <span class="brand-name">ShareSphere</span>
+        <span class="brand-tag">Free Sharing</span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="explore.html"><i class="bi bi-compass"></i> Explore</a></li>
+          <li class="nav-item"><a class="nav-link" href="donate.html"><i class="bi bi-plus-circle"></i> Donate</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html"><i class="bi bi-arrow-left-right"></i> My Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
+          <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
+        </ul>
+
+        <div id="navbar-auth-section" class="d-flex align-items-center gap-2"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5" id="profile-view-container">
+    <div class="container">
+      
+      <!-- Profile Header Hero Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4 position-relative overflow-hidden">
+        <div class="row align-items-center">
+          <div class="col-md-auto text-center mb-3 mb-md-0">
+            <!-- Clickable avatar with camera overlay -->
+            <div class="profile-avatar-wrapper" id="avatar-click-area" onclick="openEditProfileModal()" title="Click to change your photo" style="position:relative; display:inline-block; cursor:pointer;">
+              <img id="profile-avatar" src="" alt="Avatar" class="rounded-circle border border-4 border-success-subtle shadow-md" style="width: 110px; height: 110px; object-fit: cover; display: block;">
+              <div class="avatar-camera-overlay" style="position:absolute;bottom:0;right:0;background:linear-gradient(135deg,#16a34a,#0ea5e9);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.18); font-size:1rem;">
+                <i class="bi bi-camera-fill"></i>
+              </div>
+            </div>
+            <div class="small text-muted mt-1" style="font-size:0.72rem;">Click to edit photo</div>
+          </div>
+          <div class="col-md">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h3 class="fw-bold text-dark mb-0" id="profile-name">User Name</h3>
+              <span class="badge bg-success-subtle text-success py-1 px-3 rounded-pill fw-bold">Verified Member</span>
+            </div>
+            <div class="text-muted small mb-2" id="profile-email">email@example.com</div>
+            <div class="d-flex align-items-center gap-3 text-muted small flex-wrap">
+              <span id="profile-location"><i class="bi bi-geo-alt-fill text-danger"></i> Bangalore, India</span>
+              <span>•</span>
+              <span id="profile-phone-text"><i class="bi bi-telephone text-success"></i> Phone</span>
+              <span>•</span>
+              <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> <span id="profile-rating">5.0</span> / 5.0 Rating</span>
+            </div>
+          </div>
+          <div class="col-md-auto text-md-end mt-3 mt-md-0">
+            <div class="p-3 rounded-4 bg-light text-center border d-inline-block">
+              <div class="fs-4 fw-bold text-success font-display" id="profile-points">50</div>
+              <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;">Impact Points</small>
+            </div>
+            <div class="mt-2">
+              <button class="btn btn-sm btn-primary-custom rounded-pill px-3" id="btn-open-edit-profile">
+                <i class="bi bi-pencil-square"></i> Edit Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Me & Preferences Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h5 class="fw-bold text-dark mb-2"><i class="bi bi-person-lines-fill text-primary"></i> About Me / Bio</h5>
+            <p class="text-muted small mb-3" id="profile-bio-text">
+              Passionate about community sharing, reducing neighborhood landfill footprint, and helping community peers.
+            </p>
+            <div class="small text-muted">
+              <b>Preferred Handover Method:</b> <span id="profile-handover-text">Public landmark meeting</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+            <h5 class="fw-bold text-dark mb-2"><i class="bi bi-bookmark-star-fill text-success"></i> Community Interests</h5>
+            <p class="small text-muted mb-3">Resource categories of primary interest for donating and discovering:</p>
+            <div class="d-flex flex-wrap gap-2" id="profile-interests-chips">
+              <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-tag-fill text-primary"></i> Books</span>
+              <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-tag-fill text-success"></i> Food</span>
+              <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-tag-fill text-info"></i> Clothes</span>
+              <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-tag-fill text-warning"></i> Electronics</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Grid -->
+      <div class="row g-3 mb-5">
+        <div class="col-lg-3 col-6">
+          <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+            <div class="fs-2 fw-bold text-dark font-display" id="stat-user-donations">0</div>
+            <div class="small text-muted fw-bold text-uppercase">Donations Listed</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+            <div class="fs-2 fw-bold text-dark font-display" id="stat-user-requests">0</div>
+            <div class="small text-muted fw-bold text-uppercase">Resource Requests</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+            <div class="fs-2 fw-bold text-success font-display" id="stat-user-completed">0</div>
+            <div class="small text-muted fw-bold text-uppercase">Completed Shares</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="card border-0 shadow-sm rounded-4 p-3 bg-white text-center">
+            <div class="fs-2 fw-bold text-primary font-display" id="stat-user-people">0</div>
+            <div class="small text-muted fw-bold text-uppercase">People Helped</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gamification Badges Section -->
+      <section class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <span class="section-tag mb-1"><i class="bi bi-award-fill"></i> Community Rewards</span>
+            <h4 class="fw-bold text-dark mb-0">Community Badges & Honors</h4>
+            <p class="small text-muted mb-0">Earn recognitions for active donations, sustainable reuse, and neighborhood trust.</p>
+          </div>
+        </div>
+        <div class="row" id="profile-badges-grid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Edit Profile Modal (Comprehensive Profile Editor) -->
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content rounded-4 border-0 shadow-lg p-3">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-person-gear text-primary"></i> Edit Profile Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">Update your personal details, contact preferences, and profile avatar.</p>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Full Name *</label>
+              <input type="text" id="edit-name" class="form-control rounded-3" placeholder="Your Full Name">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Email Address *</label>
+              <input type="email" id="edit-email" class="form-control rounded-3" placeholder="name@example.com">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Phone / WhatsApp Number</label>
+              <input type="text" id="edit-phone" class="form-control rounded-3" placeholder="+91 98765 43210">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Neighborhood / Area Landmark</label>
+              <input type="text" id="edit-location" class="form-control rounded-3" placeholder="e.g. Koramangala 4th Block, Bangalore">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label fw-bold small text-dark">About Me / Bio</label>
+              <textarea id="edit-bio" class="form-control rounded-3" rows="3" placeholder="Introduce yourself to the neighborhood, what you share or study..."></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark">Preferred Handover Method</label>
+              <select id="edit-handover" class="form-select rounded-3">
+                <option value="Public landmark meeting">Public landmark meeting (e.g. Metro station, cafe)</option>
+                <option value="Porch drop / Doorstep pickup">Porch drop / Doorstep pickup</option>
+                <option value="Community center dropoff">Community center dropoff</option>
+                <option value="Flexible coordination">Flexible coordination</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-dark"><i class="bi bi-camera-fill text-primary"></i> Profile Photo</label>
+              <!-- Live preview of avatar -->
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <img id="edit-avatar-preview" src="" alt="Preview" class="rounded-circle border border-2 border-success-subtle" style="width:64px;height:64px;object-fit:cover;">
+                <div class="flex-fill">
+                  <label class="btn btn-sm btn-outline-primary rounded-pill w-100 mb-1" for="edit-avatar-file" style="cursor:pointer;">
+                    <i class="bi bi-upload"></i> Choose New Photo
+                  </label>
+                  <input type="file" id="edit-avatar-file" class="d-none" accept="image/*">
+                  <div id="avatar-upload-status" class="small" style="display: none;"></div>
+                </div>
+              </div>
+              <input type="text" id="edit-avatar" class="form-control form-control-sm rounded-3" placeholder="Or paste Image URL directly">
+              <div class="small text-muted mt-1"><i class="bi bi-cloud-check text-success"></i> Photo stored securely via Cloudinary</div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-2 border-top d-flex justify-content-between align-items-center">
+            <span class="small text-muted"><i class="bi bi-shield-check text-success"></i> Changes sync to your live Firebase account</span>
+            <button class="btn btn-primary-custom px-4" onclick="saveProfileChanges()">
+              <i class="bi bi-check-lg"></i> Save All Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <ul class="mobile-nav-items">
+      <li><a href="index.html" class="mobile-nav-link"><i class="bi bi-house-door-fill"></i><span>Home</span></a></li>
+      <li><a href="explore.html" class="mobile-nav-link"><i class="bi bi-compass-fill"></i><span>Explore</span></a></li>
+      <li><a href="donate.html" class="mobile-nav-donate-pill" title="Donate"><i class="bi bi-plus-lg"></i></a></li>
+      <li><a href="wishlist.html" class="mobile-nav-link"><i class="bi bi-heart-fill"></i><span>Saved</span></a></li>
+      <li><a href="profile.html" class="mobile-nav-link active"><i class="bi bi-person-fill"></i><span>Profile</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Firebase Official SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <!-- ShareSphere Core Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/location.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

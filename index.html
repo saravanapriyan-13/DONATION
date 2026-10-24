@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShareSphere - Give What You Don't Need. Find What You Do.</title>
+  <meta name="description" content="ShareSphere is a smart, free community resource-sharing and donation platform connecting donors with neighbors in need within 10 km.">
+  
+  <!-- CSS Dependencies -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom ShareSphere Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+
+  <!-- Global Navigation Bar -->
+  <nav class="navbar navbar-expand-lg sharesphere-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <div class="brand-icon">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <span class="brand-name">ShareSphere</span>
+        <span class="brand-tag">Free Sharing</span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="index.html"><i class="bi bi-house-door"></i> Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="explore.html"><i class="bi bi-compass"></i> Explore</a></li>
+          <li class="nav-item"><a class="nav-link" href="donate.html"><i class="bi bi-plus-circle"></i> Donate</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html"><i class="bi bi-arrow-left-right"></i> My Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
+          <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
+        </ul>
+
+        <div id="navbar-auth-section" class="d-flex align-items-center gap-2">
+          <!-- Populated dynamically by auth.js -->
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="row align-items-center">
+        <!-- Hero Text -->
+        <div class="col-lg-6 mb-4 mb-lg-0 animate-fade-in">
+          <div class="hero-pill">
+            <span class="pulse-dot"></span>
+            <span>Zero Waste Community Platform</span>
+          </div>
+          <h1 class="hero-title">
+            Give what you don't need.<br>
+            <span class="highlight-text">Find what you do.</span>
+          </h1>
+          <p class="hero-subtitle">
+            Share unused resources with people around your 10 km neighborhood and help build a more sustainable, compassionate community.
+          </p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="explore.html" class="btn btn-primary-custom">
+              <i class="bi bi-compass"></i> Explore Resources
+            </a>
+            <a href="donate.html" class="btn btn-secondary-custom">
+              <i class="bi bi-heart-fill text-danger"></i> Donate an Item
+            </a>
+          </div>
+          <div class="mt-4 pt-2 d-flex align-items-center gap-3 text-muted small">
+            <div><i class="bi bi-shield-check text-success"></i> 100% Free Forever</div>
+            <div>•</div>
+            <div><i class="bi bi-geo-alt-fill text-primary"></i> 10 km Radius Matching</div>
+            <div>•</div>
+            <div><i class="bi bi-recycle text-emerald"></i> Landfill Reduction</div>
+          </div>
+        </div>
+
+        <!-- Floating Resource Cards Visual -->
+        <div class="col-lg-6">
+          <div class="hero-visual">
+            <div class="hero-visual-center">
+              <div class="hero-center-badge">
+                <span class="fs-1">🤝</span>
+                <span class="fw-bold" style="font-size: 0.72rem; color: var(--primary-dark);">ShareSphere</span>
+              </div>
+            </div>
+
+            <!-- Floating Card 1: Books -->
+            <div class="floating-card floating-card-1">
+              <div class="fc-icon cat-books">📚</div>
+              <div>
+                <div class="fc-title">Maths Textbooks</div>
+                <div class="fc-meta"><i class="bi bi-geo-alt"></i> 1.2 km away • Like New</div>
+              </div>
+            </div>
+
+            <!-- Floating Card 2: Clothes -->
+            <div class="floating-card floating-card-2">
+              <div class="fc-icon cat-clothes">👕</div>
+              <div>
+                <div class="fc-title">Warm Winter Hoodies</div>
+                <div class="fc-meta"><i class="bi bi-geo-alt"></i> 2.4 km away • Good</div>
+              </div>
+            </div>
+
+            <!-- Floating Card 3: Food -->
+            <div class="floating-card floating-card-3">
+              <div class="fc-icon cat-food">🍎</div>
+              <div>
+                <div class="fc-title">Fresh Wheat Bread</div>
+                <div class="fc-meta"><i class="bi bi-hourglass-split text-danger"></i> Exp: 2 Days</div>
+              </div>
+            </div>
+
+            <!-- Floating Card 4: Electronics -->
+            <div class="floating-card floating-card-4">
+              <div class="fc-icon cat-electronics">💻</div>
+              <div>
+                <div class="fc-title">24" Monitor Screen</div>
+                <div class="fc-meta"><i class="bi bi-geo-alt"></i> 3.5 km away • Working</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero Statistics -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="row g-3">
+        <div class="col-lg-3 col-sm-6">
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--primary-light); color: var(--primary-dark);">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+              <div class="stat-number counter-val" data-target="10000">0</div>
+              <div class="stat-label">Community Members</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--secondary-light); color: var(--secondary-dark);">
+              <i class="bi bi-box2-heart-fill"></i>
+            </div>
+            <div>
+              <div class="stat-number counter-val" data-target="4500">0</div>
+              <div class="stat-label">Donations Listed</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--accent-light); color: var(--accent-dark);">
+              <i class="bi bi-arrow-repeat"></i>
+            </div>
+            <div>
+              <div class="stat-number counter-val" data-target="3200">0</div>
+              <div class="stat-label">Items Reused</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+          <div class="stat-box">
+            <div class="stat-icon" style="background: var(--highlight-light); color: var(--highlight);">
+              <i class="bi bi-emoji-smile-fill"></i>
+            </div>
+            <div>
+              <div class="stat-number counter-val" data-target="5800">0</div>
+              <div class="stat-label">People Helped</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="py-5" style="background: #fff;">
+    <div class="container">
+      <div class="section-header text-center mx-auto" style="max-width: 650px;">
+        <span class="section-tag"><i class="bi bi-grid-fill"></i> Diverse Categories</span>
+        <h2 class="section-title">What would you like to share or discover?</h2>
+        <p class="section-subtitle mx-auto">From daily surplus food to academic textbooks, every resource has someone nearby waiting for it.</p>
+      </div>
+
+      <div class="row" id="home-categories-grid">
+        <!-- Rendered dynamically by home.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Nearby Resources Section -->
+  <section class="py-5" style="background: var(--bg);">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+          <span class="section-tag"><i class="bi bi-geo-alt-fill"></i> 10 km Neighborhood</span>
+          <h2 class="section-title mb-1">Resources Near You</h2>
+          <p class="section-subtitle mb-0">Discover useful resources shared by friendly neighbors right in your area.</p>
+        </div>
+        <a href="explore.html" class="btn btn-outline-primary-custom">
+          View All Resources <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="row" id="home-nearby-grid">
+        <!-- Rendered dynamically by home.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Sustainability Impact Banner -->
+  <section class="py-5" style="background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%); color: #fff;">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+          <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-bold mb-3">
+            🌍 Zero Carbon Community Mission
+          </span>
+          <h2 class="display-6 fw-bold text-white mb-3">Every shared item saves landfill waste and carbon emissions.</h2>
+          <p class="text-light opacity-75 mb-4" style="max-width: 580px;">
+            Manufacturing new goods takes immense raw materials and energy. By re-homing books, electronics, food, and clothes within your 10 km circle, you directly reduce neighborhood carbon footprints.
+          </p>
+          <div class="d-flex gap-3">
+            <a href="impact.html" class="btn btn-primary-custom">
+              <i class="bi bi-graph-up-arrow"></i> View Impact Dashboard
+            </a>
+            <a href="donate.html" class="btn btn-secondary-custom">
+              <i class="bi bi-plus-circle"></i> Donate Today
+            </a>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="p-4 rounded-4 bg-white text-dark shadow-xl">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-leaf-fill text-success"></i> Community Environmental Metrics
+            </h5>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted">Estimated Landfill Waste Prevented</span>
+              <span class="fw-bold text-success">~4,850 kg</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted">Estimated CO₂e Avoided</span>
+              <span class="fw-bold text-primary">~8,200 kg CO₂e</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted">Active Community Neighbors</span>
+              <span class="fw-bold text-dark">10,000+</span>
+            </div>
+            <small class="text-muted d-block mt-3 fst-italic">
+              *Environmental metrics are estimations based on average lifecycle emission models.
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="py-5" style="background: #fff;">
+    <div class="container">
+      <div class="section-header text-center mx-auto" style="max-width: 600px;">
+        <span class="section-tag"><i class="bi bi-lightbulb-fill"></i> Simple Process</span>
+        <h2 class="section-title">How ShareSphere Works</h2>
+        <p class="section-subtitle mx-auto">Four simple steps to share or receive resources with zero cost.</p>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6 text-center">
+          <div class="p-4 rounded-4 bg-light h-100 border">
+            <div class="category-icon-box mx-auto cat-books">📸</div>
+            <h5 class="fw-bold mb-2">1. List Unused Items</h5>
+            <p class="small text-muted mb-0">Snap a photo of books, food, clothes, or electronics and publish in 60 seconds.</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 text-center">
+          <div class="p-4 rounded-4 bg-light h-100 border">
+            <div class="category-icon-box mx-auto cat-electronics">📍</div>
+            <h5 class="fw-bold mb-2">2. Match Within 10 km</h5>
+            <p class="small text-muted mb-0">Neighbors discover nearby items using GPS distance matching & interactive maps.</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 text-center">
+          <div class="p-4 rounded-4 bg-light h-100 border">
+            <div class="category-icon-box mx-auto cat-food">💬</div>
+            <h5 class="fw-bold mb-2">3. Connect & Schedule</h5>
+            <p class="small text-muted mb-0">Request the resource, chat in real-time, and agree on a safe pickup time.</p>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 text-center">
+          <div class="p-4 rounded-4 bg-light h-100 border">
+            <div class="category-icon-box mx-auto cat-other">🌱</div>
+            <h5 class="fw-bold mb-2">4. Handover & Earn Badges</h5>
+            <p class="small text-muted mb-0">Complete handover, earn Impact Points, and celebrate community sustainability!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modern Footer -->
+  <footer class="py-5" style="background: #0B1120; color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.08);">
+    <div class="container">
+      <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
+            <span class="fs-4 fw-bold text-white font-display">ShareSphere</span>
+          </div>
+          <p class="small mb-3">
+            A free community resource-sharing platform. We believe what one person no longer needs can become another person's essential treasure.
+          </p>
+          <div class="d-flex gap-2">
+            <span class="badge bg-success-subtle text-success">Zero Selling</span>
+            <span class="badge bg-primary-subtle text-primary">100% Free Sharing</span>
+            <span class="badge bg-info-subtle text-info">Eco-Friendly</span>
+          </div>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-white fw-bold mb-3">Explore</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="explore.html?category=Food" class="text-light opacity-75">Food Sharing</a></li>
+            <li><a href="explore.html?category=Books" class="text-light opacity-75">Textbooks & Novels</a></li>
+            <li><a href="explore.html?category=Clothes" class="text-light opacity-75">Clothes & Wearables</a></li>
+            <li><a href="explore.html?category=Electronics" class="text-light opacity-75">Electronics & Gadgets</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-6">
+          <h6 class="text-white fw-bold mb-3">Platform</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="donate.html" class="text-light opacity-75">Donate a Resource</a></li>
+            <li><a href="requests.html" class="text-light opacity-75">Track Requests</a></li>
+            <li><a href="impact.html" class="text-light opacity-75">Environmental Impact</a></li>
+            <li><a href="admin.html" class="text-light opacity-75">Admin Console</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white fw-bold mb-3">College Expo Demonstration</h6>
+          <p class="small text-muted">
+            ShareSphere is designed as a modern 2026-style full-stack community platform powered by Firebase Auth, Cloud Firestore, Firebase Storage, and Leaflet interactive geocoding.
+          </p>
+          <div class="p-2 px-3 rounded-3 bg-dark border border-secondary text-light small d-flex align-items-center justify-content-between">
+            <span>Ready for live demo & evaluation</span>
+            <span class="badge bg-success">v1.0.0 Online</span>
+          </div>
+        </div>
+      </div>
+      <div class="pt-4 border-top border-secondary text-center small text-muted">
+        © 2026 ShareSphere. Built for sustainable, free community resource sharing.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <ul class="mobile-nav-items">
+      <li>
+        <a href="index.html" class="mobile-nav-link active">
+          <i class="bi bi-house-door-fill"></i>
+          <span>Home</span>
+        </a>
+      </li>
+      <li>
+        <a href="explore.html" class="mobile-nav-link">
+          <i class="bi bi-compass-fill"></i>
+          <span>Explore</span>
+        </a>
+      </li>
+      <li>
+        <a href="donate.html" class="mobile-nav-donate-pill" title="Donate">
+          <i class="bi bi-plus-lg"></i>
+        </a>
+      </li>
+      <li>
+        <a href="wishlist.html" class="mobile-nav-link">
+          <i class="bi bi-heart-fill"></i>
+          <span>Saved</span>
+        </a>
+      </li>
+      <li>
+        <a href="profile.html" class="mobile-nav-link">
+          <i class="bi bi-person-fill"></i>
+          <span>Profile</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Official SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <!-- ShareSphere Core Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/location.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

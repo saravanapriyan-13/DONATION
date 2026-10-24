@@ -1,0 +1,23 @@
+{
+  "name": "sharesphere",
+  "version": "1.0.0",
+  "description": "ShareSphere - Smart Resource Donation & Sharing Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "donation",
+    "resource-sharing",
+    "sustainability",
+    "community",
+    "reuse"
+  ],
+  "author": "ShareSphere Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Resources - ShareSphere 10km Community Discovery</title>
+  <meta name="description" content="Discover free unused resources, textbooks, clothes, food, and electronics shared by neighbors within 10 km.">
+  
+  <!-- CSS Dependencies -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Custom ShareSphere Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+
+  <!-- Global Navigation Bar -->
+  <nav class="navbar navbar-expand-lg sharesphere-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
+        <span class="brand-name">ShareSphere</span>
+        <span class="brand-tag">Free Sharing</span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Home</a></li>
+          <li class="nav-item"><a class="nav-link active" href="explore.html"><i class="bi bi-compass"></i> Explore</a></li>
+          <li class="nav-item"><a class="nav-link" href="donate.html"><i class="bi bi-plus-circle"></i> Donate</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html"><i class="bi bi-arrow-left-right"></i> My Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
+          <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
+        </ul>
+
+        <div id="navbar-auth-section" class="d-flex align-items-center gap-2"></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Explore Header & Search Filter Card -->
+  <header class="py-4" style="background: radial-gradient(circle at 10% 20%, rgba(209, 250, 229, 0.4) 0%, rgba(248, 250, 252, 0.9) 100%); border-bottom: 1px solid var(--border);">
+    <div class="container">
+      <div class="row align-items-center mb-3">
+        <div class="col-md-8">
+          <h2 class="section-title mb-1">Discover Community Resources</h2>
+          <p class="text-muted mb-0">Browse through available free items within your 10 km local radius.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+          <button class="btn btn-sm btn-outline-primary-custom" id="btn-use-gps">
+            <i class="bi bi-crosshair text-primary"></i> 📍 Use My Current Location
+          </button>
+        </div>
+      </div>
+
+      <!-- Modern Search & Filter Panel -->
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <!-- Search Bar -->
+        <div class="input-group mb-3">
+          <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input type="text" id="explore-search-input" class="form-control bg-light border-start-0 rounded-end-pill py-2" placeholder="Search for books, clothes, electronics, bread, toys, furniture...">
+        </div>
+
+        <!-- Filters Row -->
+        <div class="row g-2">
+          <div class="col-md-3 col-6">
+            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-grid"></i> Category</label>
+            <select id="filter-category" class="form-select form-select-sm rounded-3">
+              <option value="All">All Categories</option>
+              <option value="Food">🍎 Food</option>
+              <option value="Clothes">👕 Clothes</option>
+              <option value="Books">📚 Books</option>
+              <option value="Electronics">💻 Electronics</option>
+              <option value="Furniture">🪑 Furniture</option>
+              <option value="Toys">🧸 Toys</option>
+              <option value="Other">📦 Other</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 col-6">
+            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-radar"></i> Radius</label>
+            <select id="filter-distance" class="form-select form-select-sm rounded-3">
+              <option value="2">Within 2 km</option>
+              <option value="5">Within 5 km</option>
+              <option value="10" selected>Within 10 km (Core)</option>
+              <option value="all">Any distance</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 col-6">
+            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-stars"></i> Condition</label>
+            <select id="filter-condition" class="form-select form-select-sm rounded-3">
+              <option value="All">All Conditions</option>
+              <option value="Fresh / New">Fresh / New</option>
+              <option value="Like New">Like New</option>
+              <option value="Good Condition">Good Condition</option>
+              <option value="Fair Condition">Fair Condition</option>
+            </select>
+          </div>
+
+          <div class="col-md-2 col-6">
+            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-check-circle"></i> Availability</label>
+            <select id="filter-availability" class="form-select form-select-sm rounded-3">
+              <option value="Available" selected>Available Now</option>
+              <option value="All">All Items</option>
+            </select>
+          </div>
+
+          <div class="col-md-3 col-12">
+            <label class="form-label small text-muted fw-bold mb-1"><i class="bi bi-sort-down"></i> Sort By</label>
+            <select id="filter-sort" class="form-select form-select-sm rounded-3">
+              <option value="nearest" selected>📍 Nearest to Me First</option>
+              <option value="newest">🕒 Recently Shared First</option>
+              <option value="rating">⭐ Highest Rated Donor</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Explore Content -->
+  <main class="py-4">
+    <div class="container">
+      <!-- View Mode Controls (Grid vs Map View) -->
+      <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold text-dark" id="explore-results-count">Loading resources...</span>
+          <span class="badge bg-success-subtle text-success">10 km Zone Active</span>
+        </div>
+
+        <div class="btn-group shadow-sm rounded-pill overflow-hidden" role="group">
+          <button type="button" class="btn btn-sm btn-outline-secondary active px-3" data-view-toggle="grid">
+            <i class="bi bi-grid-3x3-gap-fill"></i> Grid View
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary px-3" data-view-toggle="map">
+            <i class="bi bi-map-fill"></i> Interactive Map
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid View Container -->
+      <div class="row" id="explore-grid-view">
+        <div class="row g-4" id="explore-resources-container">
+          <!-- Rendered dynamically by explore.js -->
+        </div>
+      </div>
+
+      <!-- Map View Container (Leaflet) -->
+      <div id="explore-map-view" style="display: none;" class="mb-5">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden p-2 bg-white">
+          <div class="p-2 mb-2 d-flex align-items-center justify-content-between small text-muted">
+            <div><i class="bi bi-info-circle-fill text-primary"></i> Showing all community resources within your <b>10 km green circle</b>. Click any pin to inspect details.</div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #2563EB;"></span> You
+              <span class="d-inline-block rounded-circle" style="width: 10px; height: 10px; background: #10B981;"></span> Donated Items
+            </div>
+          </div>
+          <div id="exploreMap"></div>
+        </div>
+      </div>
+
+      <!-- Smart Recommendations Section -->
+      <section class="mt-5 pt-4 border-top" id="smart-recommendations-wrapper">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <div>
+            <span class="section-tag mb-1"><i class="bi bi-stars"></i> Smart Matching</span>
+            <h4 class="fw-bold text-dark mb-0">Recommended For You</h4>
+            <p class="small text-muted mb-0">High-utility resources near your location based on community popularity.</p>
+          </div>
+        </div>
+        <div class="row" id="smart-recommendations-container">
+          <!-- Rendered dynamically by explore.js -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <ul class="mobile-nav-items">
+      <li>
+        <a href="index.html" class="mobile-nav-link">
+          <i class="bi bi-house-door-fill"></i>
+          <span>Home</span>
+        </a>
+      </li>
+      <li>
+        <a href="explore.html" class="mobile-nav-link active">
+          <i class="bi bi-compass-fill"></i>
+          <span>Explore</span>
+        </a>
+      </li>
+      <li>
+        <a href="donate.html" class="mobile-nav-donate-pill" title="Donate">
+          <i class="bi bi-plus-lg"></i>
+        </a>
+      </li>
+      <li>
+        <a href="wishlist.html" class="mobile-nav-link">
+          <i class="bi bi-heart-fill"></i>
+          <span>Saved</span>
+        </a>
+      </li>
+      <li>
+        <a href="profile.html" class="mobile-nav-link">
+          <i class="bi bi-person-fill"></i>
+          <span>Profile</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Official SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <!-- ShareSphere Core Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/location.js"></script>
+  <script src="js/explore.js"></script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Details - ShareSphere Community</title>
+  
+  <!-- CSS Dependencies -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom ShareSphere Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+
+  <!-- Global Navigation Bar -->
+  <nav class="navbar navbar-expand-lg sharesphere-navbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
+        <span class="brand-name">ShareSphere</span>
+        <span class="brand-tag">Free Sharing</span>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="explore.html"><i class="bi bi-compass"></i> Explore</a></li>
+          <li class="nav-item"><a class="nav-link" href="donate.html"><i class="bi bi-plus-circle"></i> Donate</a></li>
+          <li class="nav-item"><a class="nav-link" href="requests.html"><i class="bi bi-arrow-left-right"></i> My Requests</a></li>
+          <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
+          <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
+        </ul>
+
+        <div id="navbar-auth-section" class="d-flex align-items-center gap-2"></div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-5">
+    <div class="container">
+      <!-- Breadcrumb navigation -->
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb small">
+          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="explore.html">Explore</a></li>
+          <li class="breadcrumb-item active" id="detail-breadcrumb-title" aria-current="page">Resource Details</li>
+        </ol>
+      </nav>
+
+      <div class="row g-4" id="donation-details-container">
+        <!-- Image Gallery Left Column -->
+        <div class="col-lg-7">
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden p-2 bg-white">
+            <div class="position-relative" style="height: 420px; border-radius: 14px; overflow: hidden; background: #f1f5f9;">
+              <img id="detail-main-img" src="" alt="Resource Image" class="w-100 h-100" style="object-fit: cover;">
+              <span id="detail-status-badge" class="status-badge-overlay available">Available</span>
+              <span id="detail-distance-badge" class="distance-badge-overlay"><i class="bi bi-geo-alt-fill"></i> 2.4 km away</span>
+            </div>
+            <!-- Thumbnails Row -->
+            <div class="d-flex gap-2 p-2 mt-2" id="detail-thumbs-container"></div>
+          </div>
+        </div>
+
+        <!-- Details Right Column -->
+        <div class="col-lg-5">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="category-badge-chip position-static" id="detail-cat-badge">
+                  <span>📚</span> <span>Category</span>
+                </span>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" id="btn-detail-wishlist" onclick="toggleDetailWishlist()">
+                  <i class="bi bi-heart"></i> Save
+                </button>
+              </div>
+
+              <h3 class="fw-bold text-dark mb-2" id="detail-title">Loading...</h3>
+              <div class="small text-muted mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt text-danger"></i> <span id="detail-location-text">Bangalore</span>
+                <span>•</span>
+                <span id="detail-time-text">Recently added</span>
+              </div>
+
+              <!-- Badges chips -->
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="meta-chip condition py-1 px-2" id="detail-condition"><i class="bi bi-shield-check"></i> Good Condition</span>
+                <span class="meta-chip py-1 px-2" id="detail-quantity"><i class="bi bi-box-seam"></i> Qty: 1</span>
+                <span class="meta-chip expiry py-1 px-2" id="detail-expiry" style="display: none;"><i class="bi bi-hourglass-split"></i> Exp: 2026-10-30</span>
+              </div>
+
+              <h6 class="fw-bold text-dark mt-4 mb-2">Resource Description</h6>
+              <p class="text-muted small" style="line-height: 1.6;" id="detail-desc">
+                Loading resource description...
+              </p>
+
+              <!-- Donor Profile Card -->
+              <div class="p-3 rounded-4 bg-light my-4 border">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center gap-3">
+                    <img id="detail-donor-avatar" src="" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
+                    <div>
+                      <h6 class="fw-bold mb-0 text-dark" id="detail-donor-name">Donor Name</h6>
+                      <div class="small text-warning" id="detail-donor-rating">
+                        <i class="bi bi-star-fill"></i> 4.9 (Community Trust Verified)
+                      </div>
+                    </div>
+                  </div>
+                  <span class="badge bg-success-subtle text-success">Verified Donor</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div>
+              <button class="btn btn-primary-custom w-100 py-3 mb-2 fs-6" id="btn-open-request-modal">
+                <i class="bi bi-hand-index-thumb-fill"></i> 🤝 Request Resource
+              </button>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted"><i class="bi bi-info-circle"></i> 100% Free • No commercial exchange</small>
+                <button class="btn btn-sm btn-link text-danger text-decoration-none" id="btn-open-report-modal">
+                  <i class="bi bi-flag"></i> Report Resource
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Resources -->
+      <section class="mt-5 pt-4 border-top">
+        <h4 class="fw-bold text-dark mb-3">Other Resources You Might Find Useful</h4>
+        <div class="row" id="detail-related-grid"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Request Resource Modal -->
+  <div class="modal fade" id="requestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg p-3">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-hand-thumbs-up-fill text-primary"></i> Request Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">
+            Send a polite message to the donor. Once accepted, you can coordinate pickup and chat in real-time.
+          </p>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark">Quantity Needed *</label>
+            <input type="number" id="req-quantity" class="form-control rounded-3" value="1" min="1" max="10">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark">Message to Donor *</label>
+            <textarea id="req-message" class="form-control rounded-3" rows="3" placeholder="Hello! I could really make good use of this for my studies/family because..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark">Preferred Pickup Window</label>
+            <select id="req-pickup-time" class="form-select rounded-3">
+              <option value="Flexible / Any time">Flexible / Any convenient time</option>
+              <option value="Today Evening">Today Evening (5:00 PM - 8:00 PM)</option>
+              <option value="Tomorrow Morning">Tomorrow Morning (9:00 AM - 12:00 PM)</option>
+              <option value="This Weekend">This Weekend</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary-custom w-100 py-2 mt-2" id="btn-submit-request">
+            <i class="bi bi-send-fill"></i> Submit Request
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Resource Modal -->
+  <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4 border-0 shadow-lg p-3">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-danger"><i class="bi bi-flag-fill"></i> Report Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="small text-muted mb-3">Help keep ShareSphere safe, respectful, and genuine.</p>
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark">Reason for reporting</label>
+            <select id="report-reason" class="form-select rounded-3">
+              <option value="Fake donation">Fake / Misleading donation</option>
+              <option value="Inappropriate content">Inappropriate / Harmful content</option>
+              <option value="Spam or Commercial">Commercial / Selling violation</option>
+              <option value="Expired donation">Expired food / Damaged beyond repair</option>
+              <option value="Suspicious activity">Suspicious activity</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-dark">Details</label>
+            <textarea id="report-note" class="form-control rounded-3" rows="2" placeholder="Optional details for moderator review..."></textarea>
+          </div>
+          <button class="btn btn-danger w-100 rounded-pill py-2" id="btn-submit-report">
+            Submit Report to Admins
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <ul class="mobile-nav-items">
+      <li><a href="index.html" class="mobile-nav-link"><i class="bi bi-house-door-fill"></i><span>Home</span></a></li>
+      <li><a href="explore.html" class="mobile-nav-link active"><i class="bi bi-compass-fill"></i><span>Explore</span></a></li>
+      <li><a href="donate.html" class="mobile-nav-donate-pill" title="Donate"><i class="bi bi-plus-lg"></i></a></li>
+      <li><a href="wishlist.html" class="mobile-nav-link"><i class="bi bi-heart-fill"></i><span>Saved</span></a></li>
+      <li><a href="profile.html" class="mobile-nav-link"><i class="bi bi-person-fill"></i><span>Profile</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- JS Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- Firebase Official SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+  <!-- ShareSphere Core Scripts -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/location.js"></script>
+  <script src="js/requests.js"></script>
+
+  <script>
+    let activeDonation = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id') || 'don_1';
+      activeDonation = window.ShareSphereDB.findById('donations', id);
+
+      if (!activeDonation) {
+        window.ShareSphereUtils.showToast('Resource not found. Redirecting to explore...', 'error');
+        setTimeout(() => window.location.href = 'explore.html', 1500);
+        return;
+      }
+
+      renderPageDetails(activeDonation);
+      renderRelatedResources(activeDonation);
+
+      // Setup Request Modal trigger
+      document.getElementById('btn-open-request-modal')?.addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('requestModal'));
+        modal.show();
+      });
+
+      document.getElementById('btn-submit-request')?.addEventListener('click', () => {
+        submitResourceRequest(activeDonation.id);
+      });
+
+      // Setup Report Modal trigger
+      document.getElementById('btn-open-report-modal')?.addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+        modal.show();
+      });
+
+      document.getElementById('btn-submit-report')?.addEventListener('click', () => {
+        const reason = document.getElementById('report-reason').value;
+        const note = document.getElementById('report-note').value;
+        const user = window.ShareSphereAuth.getCurrentUser();
+
+        window.ShareSphereDB.insert('reports', {
+          reportedId: activeDonation.id,
+          reportedTitle: activeDonation.title,
+          reporterName: user ? user.name : 'Anonymous Neighbor',
+          reason: reason,
+          note: note,
+          status: 'Pending'
+        });
+
+        window.ShareSphereUtils.showToast('Report submitted for admin moderation. Thank you for protecting the community.', 'info');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+        if (modal) modal.hide();
+      });
+    });
+
+    function renderPageDetails(d) {
+      document.title = `${d.title} - ShareSphere`;
+      document.getElementById('detail-breadcrumb-title').textContent = d.title;
+      document.getElementById('detail-title').textContent = d.title;
+      document.getElementById('detail-desc').textContent = d.description;
+      document.getElementById('detail-location-text').textContent = d.location || 'Local Community Hub';
+      document.getElementById('detail-time-text').textContent = window.ShareSphereUtils.timeAgo(d.createdAt);
+      document.getElementById('detail-condition').innerHTML = `<i class="bi bi-shield-check"></i> ${d.condition}`;
+      document.getElementById('detail-quantity').innerHTML = `<i class="bi bi-box-seam"></i> Qty: ${d.quantity}`;
+
+      const meta = window.ShareSphereUtils.getCategoryMeta(d.category);
+      document.getElementById('detail-cat-badge').innerHTML = `<span>${meta.icon}</span> <span>${d.category}</span>`;
+
+      if (d.expiryDate) {
+        const expEl = document.getElementById('detail-expiry');
+        expEl.style.display = 'inline-flex';
+        expEl.innerHTML = `<i class="bi bi-hourglass-split"></i> Exp: ${d.expiryDate}`;
+      }
+
+      // Distance calculation
+      const userLoc = window.ShareSphereLocation.getUserLocation();
+      const dist = window.ShareSphereUtils.calculateDistanceKm(userLoc.lat, userLoc.lng, d.latitude, d.longitude);
+      document.getElementById('detail-distance-badge').innerHTML = `<i class="bi bi-geo-alt-fill"></i> ${window.ShareSphereUtils.formatDistance(dist)}`;
+
+      // Status
+      const statusBadge = document.getElementById('detail-status-badge');
+      statusBadge.textContent = d.status;
+      statusBadge.className = `status-badge-overlay ${d.status.toLowerCase()}`;
+
+      // Images
+      const mainImg = document.getElementById('detail-main-img');
+      const imgList = d.imageUrls && d.imageUrls.length ? d.imageUrls : ['https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=600&q=80'];
+      mainImg.src = imgList[0];
+
+      const thumbsContainer = document.getElementById('detail-thumbs-container');
+      thumbsContainer.innerHTML = imgList.map((src, i) => `
+        <img src="${src}" class="rounded-2 border ${i === 0 ? 'border-primary border-2' : ''}" style="width: 60px; height: 50px; object-fit: cover; cursor: pointer;" onclick="document.getElementById('detail-main-img').src='${src}'">
+      `).join('');
+
+      // Donor
+      document.getElementById('detail-donor-avatar').src = d.donorAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+      document.getElementById('detail-donor-name').textContent = d.donorName || 'Community Donor';
+      document.getElementById('detail-donor-rating').innerHTML = `<i class="bi bi-star-fill"></i> ${d.donorRating || '4.9'} Community Rating`;
+
+      // Wishlist button state
+      const wishBtn = document.getElementById('btn-detail-wishlist');
+      if (window.ShareSphereUtils.isInWishlist(d.id)) {
+        wishBtn.innerHTML = '<i class="bi bi-heart-fill text-danger"></i> Saved';
+      }
+    }
+
+    function toggleDetailWishlist() {
+      if (!activeDonation) return;
+      const added = window.ShareSphereUtils.toggleWishlist(activeDonation.id);
+      const btn = document.getElementById('btn-detail-wishlist');
+      btn.innerHTML = added ? '<i class="bi bi-heart-fill text-danger"></i> Saved' : '<i class="bi bi-heart"></i> Save';
+    }
+
+    function renderRelatedResources(current) {
+      const container = document.getElementById('detail-related-grid');
+      if (!container) return;
+
+      const userLoc = window.ShareSphereLocation.getUserLocation();
+      const all = window.ShareSphereDB.getCollection('donations');
+      const related = all.filter(d => d.id !== current.id && (d.category === current.category || d.status === 'Available')).slice(0, 3);
+
+      container.innerHTML = related.map(item => window.ShareSphereUtils.renderResourceCard(item, userLoc)).join('');
+    }
+  </script>
+</body>
+</html>
