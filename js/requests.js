@@ -5,6 +5,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('my-requests-list')) {
     renderMyRequests();
+
+    window.addEventListener('sharesphere_data_changed', (e) => {
+      if (!e.detail || e.detail.collection === 'requests') {
+        renderMyRequests();
+      }
+    });
   }
 });
 

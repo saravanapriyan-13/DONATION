@@ -79,7 +79,11 @@ window.ShareSphereAuth = {
       }
     }
 
-    // 2. Resilient Local Authentication (when Firebase is not configured)
+    // 2. Resilient Authentication (synced with shared Server DB)
+    if (window.ShareSphereDB && typeof window.ShareSphereDB.syncCollectionFromAPI === 'function') {
+      try { await window.ShareSphereDB.syncCollectionFromAPI('users'); } catch (_) {}
+    }
+
     const normalizedEmail = (email || '').trim().toLowerCase();
     const users = window.ShareSphereDB ? window.ShareSphereDB.getCollection('users') : [];
     let existingUser = users.find(u => (u.email || '').trim().toLowerCase() === normalizedEmail);
@@ -188,7 +192,11 @@ window.ShareSphereAuth = {
       }
     }
 
-    // 2. Resilient Local Registration (when Firebase is not configured)
+    // 2. Resilient Registration (synced with shared Server DB)
+    if (window.ShareSphereDB && typeof window.ShareSphereDB.syncCollectionFromAPI === 'function') {
+      try { await window.ShareSphereDB.syncCollectionFromAPI('users'); } catch (_) {}
+    }
+
     const normalizedEmail = (email || '').trim().toLowerCase();
     const users = window.ShareSphereDB ? window.ShareSphereDB.getCollection('users') : [];
     const existing = users.find(u => (u.email || '').trim().toLowerCase() === normalizedEmail);

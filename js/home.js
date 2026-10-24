@@ -6,6 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroCounters();
   renderHomeCategories();
   renderHomeNearbyDonations();
+
+  window.addEventListener('sharesphere_data_changed', (e) => {
+    if (!e.detail || e.detail.collection === 'donations') {
+      renderHomeCategories();
+      renderHomeNearbyDonations();
+    }
+  });
 });
 
 /**

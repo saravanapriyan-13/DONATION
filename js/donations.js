@@ -404,10 +404,10 @@ async function handlePublishDonation() {
     confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
   }
 
-  window.ShareSphereUtils.showToast('🎉 Your resource has been successfully shared on Firebase!', 'success');
+  window.ShareSphereUtils.showToast('🎉 Your item is live! Visible to all users & friends across the platform!', 'success');
 
   setTimeout(() => {
-    window.location.href = 'donations.html';
+    window.location.href = 'explore.html';
   }, 1200);
 }
 
@@ -419,6 +419,15 @@ function initMyDonationsPage() {
   if (!user) return;
 
   renderMyDonations('All');
+
+  // Live updates
+  window.addEventListener('sharesphere_data_changed', (e) => {
+    if (!e.detail || e.detail.collection === 'donations' || e.detail.collection === 'requests') {
+      const activeTab = document.querySelector('[data-status-tab].active');
+      const status = activeTab ? activeTab.getAttribute('data-status-tab') : 'All';
+      renderMyDonations(status);
+    }
+  });
 
   const tabBtns = document.querySelectorAll('[data-status-tab]');
   tabBtns.forEach(btn => {

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ShareSphere - Explore Page: Amazon/Flipkart Style with Fixed Filtering
  * ALL donations from ALL users are visible (no distance restriction by default)
  */
@@ -17,6 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMapToggle();
   renderExploreResources();
   renderTrending();
+
+  // Listen for live updates from server or another user/tab
+  window.addEventListener('sharesphere_data_changed', (e) => {
+    if (!e.detail || e.detail.collection === 'donations') {
+      renderExploreResources();
+      renderTrending();
+    }
+  });
+
+  // Pull fresh data immediately on page load
+  if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+    window.ShareSphereDB.syncAllFromAPI().then(() => {
+      renderExploreResources();
+      renderTrending();
+    });
+  }
 });
 
 /**
