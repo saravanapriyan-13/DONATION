@@ -38,43 +38,43 @@
   --amber: #F59E0B;
   --amber-light: #FEF3C7;
 
-  /* Obsidian & Surface Spectrum */
-  --obsidian: #09090B;
-  --obsidian-subtle: #121215;
-  --obsidian-surface: #18181B;
-  --obsidian-border: #27272A;
+  /* Obsidian & Surface Spectrum - Rich Dark SaaS Aesthetic */
+  --obsidian: #080A10;
+  --obsidian-subtle: #0D111A;
+  --obsidian-surface: #121624;
+  --obsidian-border: rgba(255, 255, 255, 0.09);
 
-  --bg: #F8FAFC;
-  --bg-subtle: #F1F5F9;
-  --surface: #FFFFFF;
-  --surface-translucent: rgba(255, 255, 255, 0.82);
-  --border: #E4E4E7;
-  --border-subtle: rgba(228, 228, 231, 0.7);
+  --bg: #080A10;
+  --bg-subtle: #0D111A;
+  --surface: #121624;
+  --surface-translucent: rgba(18, 22, 36, 0.85);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --border-focus: #10B981;
 
   /* Typography Colors */
-  --text: #09090B;
-  --text-muted: #71717A;
-  --text-light: #A1A1AA;
+  --text: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-light: #64748B;
 
   /* Multi-Stop Gradients */
   --grad-primary: linear-gradient(135deg, #059669 0%, #0D9488 50%, #06B6D4 100%);
   --grad-primary-hover: linear-gradient(135deg, #10B981 0%, #14B8A6 50%, #22D3EE 100%);
   --grad-logo: linear-gradient(135deg, #34D399 0%, #14B8A6 50%, #06B6D4 100%);
-  --grad-hero: linear-gradient(135deg, #09090B 0%, #18181B 100%);
+  --grad-hero: linear-gradient(135deg, #080A10 0%, #121624 100%);
   --grad-brand: linear-gradient(135deg, #10B981 0%, #0D9488 40%, #2563EB 100%);
   --grad-accent: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
   --grad-warm: linear-gradient(135deg, #F97316 0%, #F59E0B 100%);
-  --grad-soft: linear-gradient(180deg, #F0FDF4 0%, #F8FAFC 100%);
-  --grad-glass: linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.45) 100%);
+  --grad-soft: linear-gradient(180deg, #0D111A 0%, #080A10 100%);
+  --grad-glass: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
 
   /* Multi-layered Soft Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.07), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
-  --shadow-xl: 0 20px 32px -4px rgba(15, 23, 42, 0.08), 0 8px 16px -6px rgba(16, 185, 129, 0.05);
-  --shadow-2xl: 0 25px 50px -12px rgba(15, 23, 42, 0.16), 0 12px 24px -6px rgba(16, 185, 129, 0.12);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.6), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -4px rgba(16, 185, 129, 0.08);
+  --shadow-xl: 0 20px 32px -4px rgba(0, 0, 0, 0.8), 0 8px 16px -6px rgba(16, 185, 129, 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9), 0 12px 24px -6px rgba(16, 185, 129, 0.2);
   --shadow-glow: 0 0 25px rgba(16, 185, 129, 0.35);
 
   /* Radius */
@@ -97,22 +97,30 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #080A10;
 }
 
 body {
   font-family: var(--font-main);
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: #080A10;
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.12) 0%, transparent 55%),
+    radial-gradient(circle at 90% 25%, rgba(6, 182, 212, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 10% 65%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  color: #F8FAFC;
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   letter-spacing: -0.01em;
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, h5, h6, .font-display {
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text);
+  color: #FFFFFF;
   letter-spacing: -0.025em;
 }
 
@@ -129,27 +137,20 @@ a {
   position: sticky;
   top: 0;
   z-index: 1040;
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(228, 228, 231, 0.8) !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.02) !important;
+  background: rgba(8, 10, 16, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
   padding: 0.75rem 0;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sharesphere-navbar.scrolled {
-  background: rgba(255, 255, 255, 0.95) !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.07) !important;
-  border-bottom-color: rgba(228, 228, 231, 0.95) !important;
+  background: rgba(8, 10, 16, 0.95) !important;
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.7) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
   padding: 0.6rem 0;
-}
-
-[data-bs-theme="dark"] .sharesphere-navbar,
-[data-theme="dark"] .sharesphere-navbar,
-body.dark .sharesphere-navbar {
-  background: rgba(9, 9, 11, 0.85) !important;
-  border-bottom-color: rgba(39, 39, 42, 0.8) !important;
 }
 
 .navbar-brand {
@@ -159,7 +160,7 @@ body.dark .sharesphere-navbar {
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--text);
+  color: #FFFFFF;
   padding: 0;
 }
 
@@ -1768,7 +1769,7 @@ body.dark .btn-secondary-custom {
 }
 
 /* ==========================================================================
-   Luxury Card Architecture & Soft Emerald Glow (Vercel/Linear Style)
+   Luxury Card Architecture & Soft Emerald Glow (Rich Obsidian SaaS Style)
    ========================================================================== */
 .card,
 .content-card-luxury,
@@ -1776,8 +1777,11 @@ body.dark .btn-secondary-custom {
 .impact-card,
 .stat-box {
   border-radius: 1rem !important; /* rounded-2xl */
-  border: 1px solid rgba(228, 228, 231, 0.75) !important;
-  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+  background: rgba(18, 22, 36, 0.82) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #F8FAFC !important;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 185, 129, 0.05) !important;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease !important;
 }
 
@@ -1787,33 +1791,64 @@ body.dark .btn-secondary-custom {
 .impact-card:hover,
 .stat-box:hover {
   transform: translateY(-4px) !important; /* hover:-translate-y-1 */
-  box-shadow: 0 25px 45px -10px rgba(16, 185, 129, 0.12), 0 10px 20px -5px rgba(0, 0, 0, 0.05) !important; /* hover:shadow-2xl */
+  box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(16, 185, 129, 0.18) !important;
   border-color: rgba(16, 185, 129, 0.45) !important;
 }
 
-/* Obsidian Dark Palette Overrides & Support */
-[data-bs-theme="dark"],
-[data-theme="dark"],
-body.dark {
-  background-color: var(--obsidian) !important;
-  color: #F4F4F5 !important;
+/* Rich Obsidian Dark Form Inputs & Controls */
+.form-control,
+.form-select {
+  background-color: rgba(13, 17, 28, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+  border-radius: 0.75rem !important;
 }
 
-[data-bs-theme="dark"] .card,
-[data-theme="dark"] .card,
-body.dark .card,
-[data-bs-theme="dark"] .resource-card,
-body.dark .resource-card {
-  background-color: var(--obsidian-surface) !important;
-  border-color: var(--obsidian-border) !important;
-  color: #F4F4F5 !important;
-  box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(16, 185, 129, 0.04) !important;
+.form-control:focus,
+.form-select:focus {
+  background-color: rgba(16, 21, 35, 0.95) !important;
+  border-color: #10B981 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
 }
 
-[data-bs-theme="dark"] .card:hover,
-body.dark .card:hover {
-  border-color: rgba(16, 185, 129, 0.5) !important;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.15) !important;
+.form-control::placeholder {
+  color: #64748B !important;
+}
+
+/* Modal Content in Rich Dark */
+.modal-content {
+  background: rgba(14, 18, 30, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+  backdrop-filter: blur(24px);
+}
+
+/* Bootstrap Text and Background Color Overrides for Rich Dark Mode */
+.text-dark {
+  color: #F8FAFC !important;
+}
+
+.bg-white,
+.bg-light {
+  background-color: rgba(18, 22, 36, 0.82) !important;
+  color: #F8FAFC !important;
+}
+
+/* Nav Pills / Tabs */
+.nav-pills {
+  background: rgba(13, 17, 28, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.nav-pills .nav-link {
+  color: #94A3B8 !important;
+}
+
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
 }
 
 /* ==========================================================================

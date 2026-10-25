@@ -404,23 +404,33 @@ function setupLocationAutofill() {
 
   btn.onclick = async () => {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Detecting GPS...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching Exact GPS & Address...';
     
-    const loc = await window.ShareSphereLocation.requestCurrentPosition();
-    donationFormData.latitude = loc.lat;
-    donationFormData.longitude = loc.lng;
+    try {
+      const loc = await window.ShareSphereLocation.requestCurrentPosition();
+      donationFormData.latitude = loc.lat;
+      donationFormData.longitude = loc.lng;
+      donationFormData.location = loc.address;
 
-    const locInput = document.getElementById('form-location-name');
-    if (locInput) locInput.value = loc.address || 'Detected Neighborhood Location';
+      const locInput = document.getElementById('form-location-name');
+      if (locInput) {
+        locInput.value = loc.address;
+        locInput.style.borderColor = '#10B981';
+      }
 
-    const coordsDisplay = document.getElementById('gps-coords-display');
-    if (coordsDisplay) {
-      coordsDisplay.textContent = `Lat: ${loc.lat.toFixed(4)}, Lng: ${loc.lng.toFixed(4)} (10 km Zone Active)`;
-      coordsDisplay.style.display = 'block';
+      const coordsDisplay = document.getElementById('gps-coords-display');
+      if (coordsDisplay) {
+        coordsDisplay.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i> <b>Exact Coordinates:</b> ${loc.lat.toFixed(5)}° N, ${loc.lng.toFixed(5)}° E <br><small class="text-emerald-400 opacity-90">${loc.address}</small>`;
+        coordsDisplay.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Exact Location Captured!';
+    } catch (e) {
+      console.warn('GPS location error:', e);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-geo-alt"></i> Auto-Detect My Current Location';
     }
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="bi bi-geo-alt-fill text-success"></i> Location Captured!';
   };
 }
 
@@ -433,24 +443,24 @@ function populateReviewSummary() {
   const firstImg = donationFormData.images[0] || 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=600&q=80';
 
   container.innerHTML = `
-    <div class="card border-0 shadow-sm p-4 rounded-4 bg-light">
+    <div class="card border-0 shadow-sm p-4 rounded-4" style="background: rgba(18, 20, 29, 0.75); border: 1px solid rgba(255,255,255,0.08);">
       <div class="d-flex gap-3 mb-3 flex-wrap flex-sm-nowrap">
         <img src="${firstImg}" class="rounded-3 shadow-sm" style="width: 140px; height: 110px; object-fit: cover;">
         <div>
           <span class="badge bg-primary mb-1">${meta.icon} ${donationFormData.category}</span>
-          <h5 class="fw-bold mb-1 text-dark">${donationFormData.title}</h5>
+          <h5 class="fw-bold mb-1 text-white">${donationFormData.title}</h5>
           <div class="small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> ${donationFormData.location}</div>
           <div class="d-flex gap-2 flex-wrap">
-            <span class="badge bg-white text-dark border">${donationFormData.condition}</span>
-            <span class="badge bg-white text-dark border">Qty: ${donationFormData.quantity}</span>
+            <span class="badge bg-dark text-light border border-secondary">${donationFormData.condition}</span>
+            <span class="badge bg-dark text-light border border-secondary">Qty: ${donationFormData.quantity}</span>
             ${donationFormData.expiryDate ? `<span class="badge bg-danger text-white">Exp: ${donationFormData.expiryDate}</span>` : ''}
           </div>
         </div>
       </div>
       <p class="small text-muted mb-3">${donationFormData.description}</p>
-      <div class="p-3 rounded-3 bg-white border d-flex align-items-center justify-content-between small text-muted">
-        <div>Donor: <b class="text-dark">${user ? user.name : 'Community Member'}</b></div>
-        <div>Network: <span class="badge bg-success-subtle text-success"><i class="bi bi-broadcast"></i> Live Multi-User Sync</span></div>
+      <div class="p-3 rounded-3 border d-flex align-items-center justify-content-between small text-muted" style="background: rgba(24, 27, 38, 0.6); border-color: rgba(255,255,255,0.06) !important;">
+        <div>Donor: <b class="text-white">${user ? user.name : 'Community Member'}</b></div>
+        <div>Network: <span class="badge bg-success-subtle text-success"><i class="bi bi-broadcast"></i> Live Multi-Device Sync</span></div>
       </div>
     </div>
   `;
@@ -486,10 +496,13 @@ async function handlePublishDonation() {
   }
 
   try {
+    const donationId = 'don_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     const newDonation = {
-      donorId: user.id,
-      donorName: user.name,
-      donorAvatar: user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      id: donationId,
+      donorId: user.id || user.uid || 'usr_' + Date.now(),
+      donorName: user.name || user.displayName || 'Community Member',
+      donorEmail: user.email || '',
+      donorAvatar: user.avatar || user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
       donorRating: user.rating || 5.0,
       title: donationFormData.title,
       description: donationFormData.description,
@@ -502,11 +515,21 @@ async function handlePublishDonation() {
       location: donationFormData.location,
       expiryDate: donationFormData.expiryDate,
       status: 'Available',
-      requestsCount: 0
+      requestsCount: 0,
+      createdAt: new Date().toISOString()
     };
 
-    // Save to shared database (Spring Boot, Express, or Cloud Firestore)
+    // Save to shared database (Express server, Spring Boot, and local storage)
     await window.ShareSphereDB.insert('donations', newDonation);
+
+    // Save this donation ID in local donor memory so it ALWAYS appears in My Donations
+    try {
+      const myIds = JSON.parse(localStorage.getItem('sharesphere_my_donations_ids') || '[]');
+      if (!myIds.includes(newDonation.id)) {
+        myIds.unshift(newDonation.id);
+        localStorage.setItem('sharesphere_my_donations_ids', JSON.stringify(myIds));
+      }
+    } catch (_) {}
 
     // Award +50 impact points ONCE
     const currentPoints = (user.points || 0) + 50;
@@ -524,11 +547,11 @@ async function handlePublishDonation() {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
     }
 
-    window.ShareSphereUtils.showToast('🎉 Donation published! Visible to all users across the platform.', 'success');
+    window.ShareSphereUtils.showToast('🎉 Donation published! Redirecting to My Donations...', 'success');
 
     setTimeout(() => {
-      window.location.href = 'explore.html';
-    }, 1200);
+      window.location.href = 'donations.html';
+    }, 1100);
   } catch (error) {
     console.error('Failed to publish donation:', error);
     window.ShareSphereUtils.showToast('Failed to publish donation. Please try again.', 'error');
@@ -544,10 +567,17 @@ async function handlePublishDonation() {
    My Donations Page Logic (donations.html)
    ========================================================================== */
 function initMyDonationsPage() {
-  const user = window.ShareSphereAuth.requireAuth();
-  if (!user) return;
-
+  const user = window.ShareSphereAuth.getCurrentUser();
   renderMyDonations('All');
+
+  // Immediately pull latest donations from server
+  if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+    window.ShareSphereDB.syncAllFromAPI().then(() => {
+      const activeTab = document.querySelector('[data-status-tab].active');
+      const status = activeTab ? activeTab.getAttribute('data-status-tab') : 'All';
+      renderMyDonations(status);
+    });
+  }
 
   // Live updates
   window.addEventListener('sharesphere_data_changed', (e) => {
@@ -574,8 +604,42 @@ function renderMyDonations(filterStatus) {
   if (!container) return;
 
   const user = window.ShareSphereAuth.getCurrentUser();
-  let donations = window.ShareSphereDB.getCollection('donations').filter(d => d.donorId === user.id);
+  if (!user) {
+    container.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <div class="empty-state-box p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.75);">
+          <div class="mb-3" style="font-size: 2.5rem;">🔒</div>
+          <h4 class="fw-bold text-white mb-2">Sign in to view your donations</h4>
+          <p class="text-muted mb-4">Please log in to manage your listed community items and review requests.</p>
+          <a href="login.html?redirect=donations.html" class="btn btn-primary-custom px-4 py-2">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to My Account
+          </a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const allDonations = window.ShareSphereDB.getCollection('donations');
   const allRequests = window.ShareSphereDB.getCollection('requests');
+  let myDonationIds = [];
+  try {
+    myDonationIds = JSON.parse(localStorage.getItem('sharesphere_my_donations_ids') || '[]');
+  } catch (_) {}
+
+  let donations = allDonations.filter(d => {
+    if (!d || !d.id) return false;
+    // Don't show dummy seed items
+    if (d.id.startsWith('don_seed_')) return false;
+
+    const matchId = user.id && (d.donorId === user.id || String(d.donorId) === String(user.id));
+    const matchEmail = user.email && d.donorEmail && (d.donorEmail.toLowerCase() === user.email.toLowerCase());
+    const matchEmailAsId = user.email && (d.donorId === user.email);
+    const matchName = user.name && d.donorName && (d.donorName.trim().toLowerCase() === user.name.trim().toLowerCase());
+    const matchStoredList = myDonationIds.includes(d.id);
+
+    return matchId || matchEmail || matchEmailAsId || matchName || matchStoredList;
+  });
 
   if (filterStatus !== 'All') {
     donations = donations.filter(d => d.status === filterStatus);
@@ -584,12 +648,12 @@ function renderMyDonations(filterStatus) {
   if (donations.length === 0) {
     container.innerHTML = `
       <div class="col-12">
-        <div class="empty-state-box">
-          <span class="empty-state-icon">📦</span>
-          <h4 class="empty-state-title">No donations in this view</h4>
-          <p class="empty-state-text">Your donated resources will appear here once you list them.</p>
-          <a href="donate.html" class="btn btn-primary-custom">
-            <i class="bi bi-plus-circle"></i> Donate an Item
+        <div class="empty-state-box p-5 rounded-4 text-center border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.75);">
+          <span class="empty-state-icon" style="font-size: 3rem;">📦</span>
+          <h4 class="empty-state-title text-white mt-3 mb-2">No donations in this view</h4>
+          <p class="empty-state-text text-muted mb-4">Your donated resources will appear here once you list them.</p>
+          <a href="donate.html" class="btn btn-primary-custom px-4 py-2">
+            <i class="bi bi-plus-circle me-1"></i> Donate an Item Now
           </a>
         </div>
       </div>
@@ -604,7 +668,7 @@ function renderMyDonations(filterStatus) {
 
     return `
       <div class="col-lg-6 mb-4">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
+        <div class="card border-0 shadow-xl rounded-4 overflow-hidden h-100 resource-card" style="background: rgba(18, 20, 29, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
           <div class="row g-0 h-100">
             <div class="col-sm-5 position-relative">
               <img src="${(item.imageUrls && item.imageUrls[0]) || ''}" class="w-100 h-100" style="object-fit: cover; min-height: 180px;">
@@ -620,10 +684,10 @@ function renderMyDonations(filterStatus) {
                   </span>
                   <small class="text-muted">${window.ShareSphereUtils.timeAgo(item.createdAt)}</small>
                 </div>
-                <h6 class="fw-bold text-dark mb-1">${item.title}</h6>
+                <h6 class="fw-bold text-white mb-1">${item.title}</h6>
                 <p class="small text-muted text-truncate mb-2">${item.description}</p>
                 <div class="small text-muted mb-2">
-                  <i class="bi bi-geo-alt"></i> ${item.location} • Qty: ${item.quantity}
+                  <i class="bi bi-geo-alt text-emerald-400"></i> ${item.location} • Qty: ${item.quantity}
                 </div>
               </div>
 
@@ -637,7 +701,7 @@ function renderMyDonations(filterStatus) {
                 `}
 
                 <div class="d-flex gap-2">
-                  <a href="donation-details.html?id=${item.id}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                  <a href="donation-details.html?id=${item.id}" class="btn btn-sm btn-outline-light border-secondary flex-grow-1">
                     <i class="bi bi-eye"></i> View
                   </a>
                   <button class="btn btn-sm btn-outline-danger" onclick="deleteMyDonation('${item.id}')" title="Delete Donation">

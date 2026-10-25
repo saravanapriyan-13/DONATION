@@ -3,18 +3,41 @@
  * Supports:
  * 1. Cloud Firestore & Firebase Realtime Database Live Sync (collection / onSnapshot / addDoc)
  * 2. Enterprise Java/Spring Boot & Express REST APIs (configurable base URL + CORS)
- * 3. Vercel Serverless Function (/api/data)
+ * 3. Cross-Device Wi-Fi / LAN Phone Sync (auto-detects host IP and ports)
  * 4. Cross-Tab / Cross-Account BroadcastChannel & Storage Event Live Bus
  * 5. Cloudinary & Server Multipart/Base64 Image Upload
  */
 
-// Global Backend API Base URL (auto-detects Java Spring Boot on 8080 or Express on 3000 or relative /api)
-window.SHARE_SPHERE_API_URL = window.SHARE_SPHERE_API_URL || (
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && 
-  (window.location.port !== '3000' && window.location.port !== '8080' && window.location.port !== '')
-    ? 'http://localhost:3000' // fallback to local server if on Live Server port 5500
-    : ''
-);
+// Dynamically resolve Backend API Base URL across Localhost and Friends' Phones on LAN
+function resolveBackendApiUrl() {
+  if (typeof window.SHARE_SPHERE_API_URL === 'string' && window.SHARE_SPHERE_API_URL.trim() !== '') {
+    return window.SHARE_SPHERE_API_URL;
+  }
+
+  const hostname = window.location.hostname || 'localhost';
+  const port = window.location.port;
+  const protocol = window.location.protocol || 'http:';
+
+  // If already served directly by Express (port 3000) or Spring Boot (port 8080)
+  if (port === '3000' || port === '8080') {
+    return '';
+  }
+
+  // If loaded via Live Server (port 5500) or custom dev port, on PC or Friend's Phone:
+  // Route API calls to the server running on port 3000 at the SAME IP address/hostname!
+  if (port && port !== '3000' && port !== '8080') {
+    return `${protocol}//${hostname}:3000`;
+  }
+
+  // If file:// protocol
+  if (protocol === 'file:') {
+    return 'http://localhost:3000';
+  }
+
+  return '';
+}
+
+window.SHARE_SPHERE_API_URL = resolveBackendApiUrl();
 
 // Firebase Configuration (Optional: Paste your Firebase/Firestore credentials here)
 const firebaseConfig = {
@@ -147,69 +170,8 @@ try {
   console.warn("Firebase Live Init notice:", err.message);
 }
 
-// 12 Initial Community Seed Donations (Fallback if database is brand new)
-const DEFAULT_SEED_DONATIONS = [
-  {
-    id: 'don_seed_001', donorId: 'usr_donor_priya', donorName: 'Priya Sharma',
-    donorAvatar: 'https://i.pravatar.cc/150?img=47', donorRating: 4.9,
-    title: 'Engineering Textbooks (3rd Year CSE)', category: 'Books',
-    description: 'Complete set of 3rd year CS textbooks — OS, DBMS, CN, Algorithms. All in excellent condition with highlighted notes.',
-    quantity: 6, condition: 'Like New', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9352, longitude: 77.6245, location: 'Koramangala, Bangalore',
-    expiryDate: null, requestsCount: 3, createdAt: new Date(Date.now() - 3600000).toISOString()
-  },
-  {
-    id: 'don_seed_002', donorId: 'usr_donor_rahul', donorName: 'Rahul Verma',
-    donorAvatar: 'https://i.pravatar.cc/150?img=12', donorRating: 4.8,
-    title: 'Fresh Home Cooked Meal (Serves 4)', category: 'Food',
-    description: 'Freshly prepared vegetarian rice, dal, and paneer curry. Hygienically packed in insulated containers. Extra from a family lunch.',
-    quantity: 4, condition: 'Fresh / New', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9716, longitude: 77.5946, location: 'MG Road, Bangalore',
-    expiryDate: new Date(Date.now() + 8 * 3600000).toISOString().split('T')[0], requestsCount: 1, createdAt: new Date(Date.now() - 1800000).toISOString()
-  },
-  {
-    id: 'don_seed_003', donorId: 'usr_donor_anita', donorName: 'Anita Desai',
-    donorAvatar: 'https://i.pravatar.cc/150?img=32', donorRating: 5.0,
-    title: 'Winter Jackets & Sweaters (Size L & XL)', category: 'Clothes',
-    description: '3 warm winter jackets and 2 woollen sweaters. Clean, dry-washed and folded. Perfect for cold weather relief.',
-    quantity: 5, condition: 'Good Condition', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9784, longitude: 77.6408, location: 'Indiranagar, Bangalore',
-    expiryDate: null, requestsCount: 7, createdAt: new Date(Date.now() - 7200000).toISOString()
-  },
-  {
-    id: 'don_seed_004', donorId: 'usr_donor_karthik', donorName: 'Karthik Nair',
-    donorAvatar: 'https://i.pravatar.cc/150?img=68', donorRating: 4.7,
-    title: 'Dell 22-inch Full HD Monitor (HDMI/VGA)', category: 'Electronics',
-    description: 'Working 22" 1080p desktop monitor. Great for students or work from home. Power adapter and HDMI cable included.',
-    quantity: 1, condition: 'Good Condition', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9250, longitude: 77.5938, location: 'Jayanagar, Bangalore',
-    expiryDate: null, requestsCount: 12, createdAt: new Date(Date.now() - 14400000).toISOString()
-  },
-  {
-    id: 'don_seed_005', donorId: 'usr_donor_meera', donorName: 'Meera Patel',
-    donorAvatar: 'https://i.pravatar.cc/150?img=26', donorRating: 4.9,
-    title: 'Wooden Study Table & Ergonomic Chair', category: 'Furniture',
-    description: 'Solid wood study desk with 2 drawers + adjustable mesh office chair. Slight scuff on desk corner, structurally 100% sound.',
-    quantity: 2, condition: 'Good Condition', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9900, longitude: 77.5500, location: 'Malleshwaram, Bangalore',
-    expiryDate: null, requestsCount: 9, createdAt: new Date(Date.now() - 28800000).toISOString()
-  },
-  {
-    id: 'don_seed_006', donorId: 'usr_donor_arjun', donorName: 'Arjun Reddy',
-    donorAvatar: 'https://i.pravatar.cc/150?img=53', donorRating: 5.0,
-    title: 'Kids Building Blocks & STEM Puzzles', category: 'Toys',
-    description: 'Full box of classic LEGO style building blocks (over 300 pieces) + 3 wooden brain teaser puzzles for ages 5-12.',
-    quantity: 4, condition: 'Like New', status: 'Available',
-    imageUrls: ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80'],
-    latitude: 12.9698, longitude: 77.7499, location: 'Whitefield, Bangalore',
-    expiryDate: null, requestsCount: 4, createdAt: new Date(Date.now() - 43200000).toISOString()
-  }
-];
+// All dummy seed donations removed — pure real community listings
+const DEFAULT_SEED_DONATIONS = [];
 
 // Seed Users for local and demo authentication
 const DEFAULT_SEED_USERS = [
@@ -230,60 +192,6 @@ const DEFAULT_SEED_USERS = [
     peopleHelped: 5,
     badges: ['Platform Admin', 'Eco Anchor', 'Community Champion'],
     createdAt: new Date().toISOString()
-  },
-  {
-    id: 'usr_donor_priya',
-    name: 'Priya Sharma',
-    email: 'priya@example.com',
-    password: 'password123',
-    role: 'user',
-    status: 'Active',
-    avatar: 'https://i.pravatar.cc/150?img=47',
-    location: 'Koramangala, Bangalore',
-    points: 250,
-    rating: 4.9,
-    donationsCount: 3,
-    requestsCount: 1,
-    completedCount: 3,
-    peopleHelped: 4,
-    badges: ['Eco Starter', 'Community Helper'],
-    createdAt: new Date(Date.now() - 86400000).toISOString()
-  },
-  {
-    id: 'usr_donor_rahul',
-    name: 'Rahul Verma',
-    email: 'rahul@example.com',
-    password: 'password123',
-    role: 'user',
-    status: 'Active',
-    avatar: 'https://i.pravatar.cc/150?img=12',
-    location: 'MG Road, Bangalore',
-    points: 120,
-    rating: 4.8,
-    donationsCount: 2,
-    requestsCount: 0,
-    completedCount: 2,
-    peopleHelped: 2,
-    badges: ['Eco Starter'],
-    createdAt: new Date(Date.now() - 172800000).toISOString()
-  },
-  {
-    id: 'usr_donor_anita',
-    name: 'Anita Desai',
-    email: 'anita@example.com',
-    password: 'password123',
-    role: 'user',
-    status: 'Active',
-    avatar: 'https://i.pravatar.cc/150?img=32',
-    location: 'Indiranagar, Bangalore',
-    points: 400,
-    rating: 5.0,
-    donationsCount: 4,
-    requestsCount: 2,
-    completedCount: 4,
-    peopleHelped: 6,
-    badges: ['Eco Starter', 'Community Helper', 'Waste Reducer'],
-    createdAt: new Date(Date.now() - 259200000).toISOString()
   }
 ];
 
@@ -319,11 +227,11 @@ class ShareSphereStore {
       }
     });
 
-    // Seed initial donations & users if empty
+    // Clean up any legacy dummy seed donations
     this.initDefaultSeedData();
 
-    // Initial fetch from Server API
-    this.syncAllFromAPI();
+    // Check backend connection and sync data immediately
+    this.checkAndSyncBackend();
 
     // Start background live polling (3 second interval)
     this.startLiveSync();
@@ -341,11 +249,42 @@ class ShareSphereStore {
     });
   }
 
-  initDefaultSeedData() {
-    const existing = this.getCollection('donations');
-    if (!existing || existing.length === 0) {
-      this.setCollection('donations', DEFAULT_SEED_DONATIONS, true);
+  async checkAndSyncBackend() {
+    // Probe primary resolved backend URL
+    const baseUrl = window.SHARE_SPHERE_API_URL || '';
+    try {
+      const ping = await fetch(`${baseUrl}/api/data/donations`, { cache: 'no-cache' });
+      if (ping.ok) {
+        console.log(`🌐 Connected to ShareSphere Backend at [${baseUrl || 'same origin'}]`);
+      }
+    } catch (_) {
+      // If primary failed and we're not on 3000, try port 3000 on current hostname
+      const host = window.location.hostname || 'localhost';
+      const altUrl = `http://${host}:3000`;
+      try {
+        const altPing = await fetch(`${altUrl}/api/data/donations`, { cache: 'no-cache' });
+        if (altPing.ok) {
+          window.SHARE_SPHERE_API_URL = altUrl;
+          console.log(`🌐 Switched to ShareSphere Live Backend at: ${altUrl}`);
+        }
+      } catch (e) {
+        // Fallback to local offline cache
+      }
     }
+    await this.syncAllFromAPI();
+  }
+
+  initDefaultSeedData() {
+    // Remove any legacy dummy seed items with id starting with don_seed_
+    const existing = this.getCollection('donations');
+    if (Array.isArray(existing) && existing.length > 0) {
+      const filtered = existing.filter(d => d && d.id && !d.id.startsWith('don_seed_'));
+      if (filtered.length !== existing.length) {
+        this.setCollection('donations', filtered, true);
+        console.log(`🧹 Removed ${existing.length - filtered.length} legacy dummy donations from local storage`);
+      }
+    }
+
     const existingUsers = this.getCollection('users');
     if (!existingUsers || existingUsers.length === 0) {
       this.setCollection('users', DEFAULT_SEED_USERS, true);
@@ -389,6 +328,28 @@ class ShareSphereStore {
   }
 
   /**
+   * Push an item to the backend server
+   */
+  async pushItemToServer(name, item) {
+    const baseUrl = window.SHARE_SPHERE_API_URL || '';
+    try {
+      const res = await fetch(`${baseUrl}/api/data/${name}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        console.log(`🌐 Item synced to server database: [${name}/${(json.item && json.item.id) || item.id}]`);
+        return true;
+      }
+    } catch (err) {
+      console.warn(`Server push notice for ${name}: ${err.message}. Retained locally.`);
+    }
+    return false;
+  }
+
+  /**
    * Sync collections from Server REST API (Spring Boot, Express, or Vercel serverless)
    */
   async syncCollectionFromAPI(collectionName) {
@@ -399,20 +360,24 @@ class ShareSphereStore {
       if (!res.ok) return;
       const json = await res.json();
       if (json && json.success && Array.isArray(json.data)) {
-        const localItems = this.getCollection(collectionName);
+        // Filter out any legacy dummy seed items
+        const remoteItems = json.data.filter(item => item && item.id && !item.id.startsWith('don_seed_'));
         
-        // Merge strategy: Union remote items with local unique items
+        // Merge strategy: Remote items + Any local unsynced items
         const remoteMap = new Map();
-        json.data.forEach(item => {
+        remoteItems.forEach(item => {
           if (item && item.id) remoteMap.set(item.id, item);
         });
 
-        // Add any local items not yet on the server
-        localItems.forEach(item => {
+        const localItems = this.getCollection(collectionName).filter(item => item && item.id && !item.id.startsWith('don_seed_'));
+
+        // Push any local items not yet on the server
+        for (const item of localItems) {
           if (item && item.id && !remoteMap.has(item.id)) {
             remoteMap.set(item.id, item);
+            this.pushItemToServer(collectionName, item);
           }
-        });
+        }
 
         const mergedItems = Array.from(remoteMap.values());
         
@@ -424,7 +389,7 @@ class ShareSphereStore {
 
         if (serverJson !== localJson) {
           this.setCollection(collectionName, mergedItems, false);
-          console.log(`🔄 Synced ${mergedItems.length} ${collectionName} across accounts from shared backend.`);
+          console.log(`🔄 Synced ${mergedItems.length} ${collectionName} across devices.`);
         }
       }
     } catch (err) {
@@ -469,25 +434,10 @@ class ShareSphereStore {
     items.unshift(newItem);
     this.setCollection(name, items);
 
-    // 1. Save to Shared Backend Server (Java Spring Boot, Express, or Vercel serverless)
-    try {
-      const baseUrl = window.SHARE_SPHERE_API_URL || '';
-      const res = await fetch(`${baseUrl}/api/data/${name}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newItem)
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.item) {
-          console.log(`🌐 Item saved globally to shared backend: [${name}/${json.item.id}]`);
-        }
-      }
-    } catch (err) {
-      console.warn(`Backend API write notice: ${err.message}. Saved locally & queued for sync.`);
-    }
+    // 1. Save to Shared Backend Server (Express or Spring Boot)
+    await this.pushItemToServer(name, newItem);
 
-    // 2. Save to Cloud Firestore (Real-time Cloud Database without donorId filtering)
+    // 2. Save to Cloud Firestore
     if (fbFirestore) {
       try {
         await fbFirestore.collection(name).doc(newItem.id).set(newItem);
@@ -597,11 +547,13 @@ class ShareSphereStore {
 
     for (const col of collections) {
       try {
-        // Listening to full collection WITHOUT filtering by donorId (public feed)
         fbFirestore.collection(col).onSnapshot((snapshot) => {
           const remoteItems = [];
           snapshot.forEach(doc => {
-            remoteItems.push(doc.data());
+            const data = doc.data();
+            if (data && data.id && !data.id.startsWith('don_seed_')) {
+              remoteItems.push(data);
+            }
           });
           if (remoteItems.length > 0) {
             console.log(`🔥 Firestore Snapshot: Received ${remoteItems.length} items for [${col}]`);
@@ -628,7 +580,7 @@ class ShareSphereStore {
         fbDatabase.ref(col).on('value', (snapshot) => {
           const val = snapshot.val();
           if (val) {
-            const arr = Object.values(val);
+            const arr = Object.values(val).filter(item => item && item.id && !item.id.startsWith('don_seed_'));
             this.setCollection(col, arr);
           }
         });

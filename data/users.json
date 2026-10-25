@@ -1,0 +1,113 @@
+[
+  {
+    "id": "admin_1",
+    "name": "ShareSphere Master Admin",
+    "email": "admin@sharesphere.org",
+    "role": "admin",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
+    "location": "Central Headquarters",
+    "points": 5000,
+    "rating": 5,
+    "donationsCount": 25,
+    "requestsCount": 5,
+    "completedCount": 25,
+    "peopleHelped": 120,
+    "badges": [
+      "Community Champion",
+      "Generous Donor"
+    ],
+    "createdAt": "2025-01-01T00:00:00Z",
+    "updatedAt": "2026-10-25T18:37:14.661Z"
+  },
+  {
+    "id": "user_donor_3",
+    "name": "Alex Thorne",
+    "email": "alex.t@example.com",
+    "role": "user",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    "location": "BTM Layout, Bangalore",
+    "points": 780,
+    "rating": 4.8,
+    "donationsCount": 8,
+    "requestsCount": 11,
+    "completedCount": 15,
+    "peopleHelped": 16,
+    "badges": [
+      "Eco Starter",
+      "Community Helper"
+    ],
+    "createdAt": "2025-11-20T14:15:00Z",
+    "updatedAt": "2026-10-25T18:37:14.655Z"
+  },
+  {
+    "id": "user_donor_2",
+    "name": "Green Hearth Bakery & Cafe",
+    "email": "community@greenhearth.org",
+    "role": "user",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    "location": "Indiranagar, Bangalore",
+    "points": 2150,
+    "rating": 5,
+    "donationsCount": 38,
+    "requestsCount": 2,
+    "completedCount": 36,
+    "peopleHelped": 84,
+    "badges": [
+      "Eco Starter",
+      "Community Helper",
+      "Waste Reducer",
+      "Generous Donor",
+      "Community Champion"
+    ],
+    "createdAt": "2025-05-10T09:30:00Z",
+    "updatedAt": "2026-10-25T18:37:14.639Z"
+  },
+  {
+    "id": "user_donor_1",
+    "name": "Dr. Sarah Jenkins",
+    "email": "sarah.jenkins@example.org",
+    "role": "user",
+    "status": "Active",
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
+    "location": "Koramangala, Bangalore",
+    "points": 1240,
+    "rating": 4.9,
+    "donationsCount": 14,
+    "requestsCount": 6,
+    "completedCount": 18,
+    "peopleHelped": 29,
+    "badges": [
+      "Eco Starter",
+      "Community Helper",
+      "Generous Donor"
+    ],
+    "createdAt": "2025-08-15T10:00:00Z",
+    "updatedAt": "2026-10-25T18:37:14.633Z"
+  },
+  {
+    "id": "usr_1792828906093",
+    "name": "saravana",
+    "email": "ksaravanapriyan8@gmail.com",
+    "role": "user",
+    "status": "Active",
+    "avatar": "https://res.cloudinary.com/yac2tczu/image/upload/v1792834188/Screenshot_2026-09-14_220912.png",
+    "location": "thalavapalayam, karur",
+    "points": 300,
+    "rating": 5,
+    "donationsCount": 1,
+    "requestsCount": 0,
+    "completedCount": 0,
+    "peopleHelped": 0,
+    "badges": [
+      "Eco Starter"
+    ],
+    "createdAt": "2026-10-24T08:01:46.093Z",
+    "updatedAt": "2026-10-25T18:37:14.628Z",
+    "phone": "",
+    "bio": "",
+    "preferredHandover": "Public landmark meeting"
+  }
+]

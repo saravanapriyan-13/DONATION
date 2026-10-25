@@ -33,6 +33,16 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTrending();
     });
   }
+
+  // Periodic live check for donations uploaded from other phones/devices
+  setInterval(() => {
+    if (window.ShareSphereDB && typeof window.ShareSphereDB.syncCollectionFromAPI === 'function') {
+      window.ShareSphereDB.syncCollectionFromAPI('donations').then(() => {
+        renderExploreResources();
+        renderTrending();
+      });
+    }
+  }, 3000);
 });
 
 /**
@@ -131,7 +141,7 @@ function getFilteredResources() {
   const sortVal = document.getElementById('filter-sort')?.value || 'newest';
   const userLoc = window.ShareSphereLocation.getUserLocation();
 
-  let donations = window.ShareSphereDB.getCollection('donations');
+  let donations = window.ShareSphereDB.getCollection('donations').filter(d => d && d.id && !d.id.startsWith('don_seed_'));
 
   // Attach distance for display (does NOT filter on it unless user sets GPS sort)
   donations = donations.map(item => ({
@@ -164,7 +174,7 @@ function getFilteredResources() {
 
   // Availability (case-insensitive check for 'AVAILABLE')
   if (availabilityVal === 'Available') {
-    donations = donations.filter(d => (d.status || '').toUpperCase() === 'AVAILABLE');
+    donations = donations.filter(d => !d.status || (d.status || '').toUpperCase() === 'AVAILABLE');
   }
 
   // Sorting
@@ -197,7 +207,7 @@ function renderExploreResources() {
   }
 
   if (items.length === 0) {
-    container.innerHTML = '<div style="grid-column:1/-1;"><div class="explore-empty"><span class="explore-empty-icon">🔍</span><h5 style="color:#333;font-weight:700;">No items match your filters</h5><p style="color:#666;font-size:0.9rem;">Try a different category or clear your search.</p><button class="btn btn-sm" style="background:var(--primary);color:#fff;border-radius:4px;padding:6px 18px;" onclick="resetExploreFilters()">Clear Filters</button></div></div>';
+    container.innerHTML = '<div style="grid-column:1/-1;"><div class="explore-empty p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 22, 36, 0.85);"><span class="explore-empty-icon" style="font-size:3.5rem;">📦</span><h4 class="fw-bold text-white mb-2">No donations match your filter</h4><p class="text-muted mb-4">Be the first to donate an item or try clearing your filters.</p><a href="donate.html" class="btn btn-primary-custom px-4 py-2 me-2"><i class="bi bi-plus-circle me-1"></i> Donate an Item</a><button class="btn btn-outline-light px-3 py-2" onclick="resetExploreFilters()">Reset Filters</button></div></div>';
     return;
   }
 

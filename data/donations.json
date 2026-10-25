@@ -1,5 +1,28 @@
 [
   {
+    "donorId": "usr_1792828906093",
+    "donorName": "saravana",
+    "donorAvatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80",
+    "donorRating": 5,
+    "title": "EM 3 BOOK",
+    "description": "its a book publised by g balaji publishers",
+    "category": "Books",
+    "quantity": 1,
+    "condition": "Good Condition",
+    "imageUrls": [
+      "https://res.cloudinary.com/yac2tczu/image/upload/v1792833803/Screenshot_2026-07-31_231331.png"
+    ],
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "location": "thalavapalayam, karur",
+    "expiryDate": null,
+    "status": "Available",
+    "requestsCount": 0,
+    "id": "id_1792833811769_50o9gd",
+    "createdAt": "2026-10-24T09:23:31.769Z",
+    "updatedAt": "2026-10-25T18:37:14.666Z"
+  },
+  {
     "title": "Friend Mountain Bike",
     "category": "Other",
     "description": "Excellent gear cycle for college student",
@@ -15,269 +38,5 @@
     "id": "id_1792848937160_t776vo",
     "createdAt": "2026-10-24T13:35:37.160Z",
     "updatedAt": "2026-10-24T13:35:37.160Z"
-  },
-  {
-    "id": "don_seed_001",
-    "donorId": "usr_donor_priya",
-    "donorName": "Priya Sharma",
-    "donorAvatar": "https://i.pravatar.cc/150?img=47",
-    "donorRating": 4.9,
-    "title": "Engineering Textbooks (3rd Year CSE)",
-    "category": "Books",
-    "description": "Complete set of 3rd year CS textbooks — OS, DBMS, CN, Algorithms. All in excellent condition with highlighted notes.",
-    "quantity": 6,
-    "condition": "Like New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9352,
-    "longitude": 77.6245,
-    "location": "Koramangala, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 3,
-    "createdAt": "2026-10-24T11:26:16.964Z"
-  },
-  {
-    "id": "don_seed_002",
-    "donorId": "usr_donor_raj",
-    "donorName": "Raj Kumar",
-    "donorAvatar": "https://i.pravatar.cc/150?img=12",
-    "donorRating": 5,
-    "title": "HomeMade Sambar & Rice (4 Portions)",
-    "category": "Food",
-    "description": "Freshly cooked sambar rice, rasam and papad. Enough for a family of 4. Made with love today morning.",
-    "quantity": 4,
-    "condition": "Fresh / New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9783,
-    "longitude": 77.6408,
-    "location": "Indiranagar, Bangalore",
-    "expiryDate": "2026-10-24",
-    "requestsCount": 1,
-    "createdAt": "2026-10-24T12:41:16.966Z"
-  },
-  {
-    "id": "don_seed_003",
-    "donorId": "usr_donor_meera",
-    "donorName": "Meera Nair",
-    "donorAvatar": "https://i.pravatar.cc/150?img=32",
-    "donorRating": 4.8,
-    "title": "Kids Winter Clothes Bundle (Age 5-7)",
-    "category": "Clothes",
-    "description": "Warm jackets, sweaters, full pants for 5-7 year old kids. Well maintained, no stains. Perfect for winter season.",
-    "quantity": 8,
-    "condition": "Good Condition",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9141,
-    "longitude": 77.6101,
-    "location": "BTM Layout, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 2,
-    "createdAt": "2026-10-24T08:26:16.966Z"
-  },
-  {
-    "id": "don_seed_004",
-    "donorId": "usr_donor_arjun",
-    "donorName": "Arjun Patel",
-    "donorAvatar": "https://i.pravatar.cc/150?img=53",
-    "donorRating": 4.7,
-    "title": "Dell Laptop (i5, 8GB RAM, 256 SSD)",
-    "category": "Electronics",
-    "description": "Dell Inspiron 5000 series, Windows 11. Works perfectly, just upgrading to a new system. Includes charger and bag.",
-    "quantity": 1,
-    "condition": "Good Condition",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9582,
-    "longitude": 77.6484,
-    "location": "HSR Layout, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 7,
-    "createdAt": "2026-10-24T12:26:16.966Z"
-  },
-  {
-    "id": "don_seed_005",
-    "donorId": "usr_donor_kavya",
-    "donorName": "Kavya Reddy",
-    "donorAvatar": "https://i.pravatar.cc/150?img=25",
-    "donorRating": 5,
-    "title": "Wooden Study Table with Chair",
-    "category": "Furniture",
-    "description": "Solid wood study table (4ft x 2ft) with matching cushioned chair. Minor scratches on table edge. Self pickup.",
-    "quantity": 1,
-    "condition": "Good Condition",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9002,
-    "longitude": 77.598,
-    "location": "Jayanagar, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 4,
-    "createdAt": "2026-10-24T05:26:16.966Z"
-  },
-  {
-    "id": "don_seed_006",
-    "donorId": "usr_donor_suresh",
-    "donorName": "Suresh Pillai",
-    "donorAvatar": "https://i.pravatar.cc/150?img=8",
-    "donorRating": 4.6,
-    "title": "LEGO City & Duplo Sets (Mixed)",
-    "category": "Toys",
-    "description": "Collection of LEGO and Duplo sets, mostly complete. Great for kids 3-10 years old. Washed and sorted.",
-    "quantity": 3,
-    "condition": "Good Condition",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9698,
-    "longitude": 77.7499,
-    "location": "Whitefield, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 2,
-    "createdAt": "2026-10-24T01:26:16.966Z"
-  },
-  {
-    "id": "don_seed_007",
-    "donorId": "usr_donor_ananya",
-    "donorName": "Ananya Singh",
-    "donorAvatar": "https://i.pravatar.cc/150?img=44",
-    "donorRating": 4.9,
-    "title": "Homemade Biryani (Veg) — 6 Portions",
-    "category": "Food",
-    "description": "Freshly made veg biryani with raita and salad. Made for a gathering that got cancelled. Please collect today.",
-    "quantity": 6,
-    "condition": "Fresh / New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 13.0297,
-    "longitude": 77.5906,
-    "location": "Hebbal, Bangalore",
-    "expiryDate": "2026-10-24",
-    "requestsCount": 0,
-    "createdAt": "2026-10-24T13:01:16.966Z"
-  },
-  {
-    "id": "don_seed_008",
-    "donorId": "usr_donor_vikram",
-    "donorName": "Vikram Rao",
-    "donorAvatar": "https://i.pravatar.cc/150?img=15",
-    "donorRating": 4.8,
-    "title": "Bluetooth Speaker — Sony SRS-XB23",
-    "category": "Electronics",
-    "description": "Sony portable speaker, excellent sound quality. Minor scratch on back. 12h battery. Original box included.",
-    "quantity": 1,
-    "condition": "Like New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9855,
-    "longitude": 77.748,
-    "location": "Marathahalli, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 5,
-    "createdAt": "2026-10-24T10:26:16.966Z"
-  },
-  {
-    "id": "don_seed_009",
-    "donorId": "usr_donor_deepa",
-    "donorName": "Deepa Krishnan",
-    "donorAvatar": "https://i.pravatar.cc/150?img=39",
-    "donorRating": 4.7,
-    "title": "Ladies Office Wear (M/L Size)",
-    "category": "Clothes",
-    "description": "Formal shirts, trousers and blazers for office. Medium to Large size. All dry-cleaned and ready to wear.",
-    "quantity": 10,
-    "condition": "Like New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9279,
-    "longitude": 77.6271,
-    "location": "HSR Layout, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 1,
-    "createdAt": "2026-10-24T07:26:16.966Z"
-  },
-  {
-    "id": "don_seed_010",
-    "donorId": "usr_donor_sanjay",
-    "donorName": "Sanjay Mehta",
-    "donorAvatar": "https://i.pravatar.cc/150?img=6",
-    "donorRating": 5,
-    "title": "Medical Reference Books (MBBS Final Year)",
-    "category": "Books",
-    "description": "Harrison's Principles, Gray's Anatomy, Davidson's. Genuine 20th editions. Very well maintained.",
-    "quantity": 4,
-    "condition": "Good Condition",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9592,
-    "longitude": 77.5957,
-    "location": "Rajajinagar, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 8,
-    "createdAt": "2026-10-23T17:26:16.966Z"
-  },
-  {
-    "id": "don_seed_011",
-    "donorId": "usr_donor_lakshmi",
-    "donorName": "Lakshmi Venkat",
-    "donorAvatar": "https://i.pravatar.cc/150?img=56",
-    "donorRating": 4.9,
-    "title": "Indoor Plants (5 pots) — Pothos & Money Plant",
-    "category": "Other",
-    "description": "Healthy Pothos, Money Plant, and Peace Lily in terracotta pots. Great air purifiers. Self pickup from doorstep.",
-    "quantity": 5,
-    "condition": "Like New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.945,
-    "longitude": 77.595,
-    "location": "Sadashivanagar, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 0,
-    "createdAt": "2026-10-24T12:56:16.966Z"
-  },
-  {
-    "id": "don_seed_012",
-    "donorId": "usr_donor_rohit",
-    "donorName": "Rohit Joshi",
-    "donorAvatar": "https://i.pravatar.cc/150?img=20",
-    "donorRating": 4.6,
-    "title": "Yoga Mat & Resistance Bands Kit",
-    "category": "Other",
-    "description": "Extra thick 6mm yoga mat (barely used) + set of 3 resistance bands. Perfect for home gym setup.",
-    "quantity": 1,
-    "condition": "Like New",
-    "status": "Available",
-    "imageUrls": [
-      "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=600&q=80"
-    ],
-    "latitude": 12.9116,
-    "longitude": 77.6389,
-    "location": "Silk Board, Bangalore",
-    "expiryDate": null,
-    "requestsCount": 3,
-    "createdAt": "2026-10-24T04:26:16.966Z"
   }
 ]
