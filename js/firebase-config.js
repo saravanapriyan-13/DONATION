@@ -1,9 +1,22 @@
 /**
- * ShareSphere - Firebase, Server API & Cloudinary Unified Integration
- * Supports Real Multi-User Live Sync across different devices and browsers!
+ * ShareSphere - Enterprise Multi-User Data Synchronization Engine
+ * Supports:
+ * 1. Cloud Firestore & Firebase Realtime Database Live Sync (collection / onSnapshot / addDoc)
+ * 2. Enterprise Java/Spring Boot & Express REST APIs (configurable base URL + CORS)
+ * 3. Vercel Serverless Function (/api/data)
+ * 4. Cross-Tab / Cross-Account BroadcastChannel & Storage Event Live Bus
+ * 5. Cloudinary & Server Multipart/Base64 Image Upload
  */
 
-// Firebase Configuration (optional, works seamlessly with or without Firebase)
+// Global Backend API Base URL (auto-detects Java Spring Boot on 8080 or Express on 3000 or relative /api)
+window.SHARE_SPHERE_API_URL = window.SHARE_SPHERE_API_URL || (
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && 
+  (window.location.port !== '3000' && window.location.port !== '8080' && window.location.port !== '')
+    ? 'http://localhost:3000' // fallback to local server if on Live Server port 5500
+    : ''
+);
+
+// Firebase Configuration (Optional: Paste your Firebase/Firestore credentials here)
 const firebaseConfig = {
   apiKey: "",
   authDomain: "",
@@ -15,14 +28,14 @@ const firebaseConfig = {
   measurementId: ""
 };
 
-// Cloudinary Configuration (optional, falls back to server /api/upload)
+// Cloudinary Configuration (Optional: Direct unsigned client-side uploads)
 const cloudinaryConfig = {
   cloudName: "",
   uploadPreset: "",
   apiKey: ""
 };
 
-// Global Image Upload Helper (Cloudinary or Server Local Uploads)
+// Global Image Upload Helper (Cloudinary, Backend API, or Resilient Fallback)
 window.ShareSphereCloudinary = {
   config: cloudinaryConfig,
 
@@ -32,7 +45,7 @@ window.ShareSphereCloudinary = {
    * @returns {Promise<string>} secure_url / public_url
    */
   async upload(file) {
-    // 1. Try Cloudinary if configured
+    // 1. Try Cloudinary if credentials are configured
     if (this.config.cloudName && this.config.uploadPreset && this.config.apiKey) {
       try {
         const formData = new FormData();
@@ -55,7 +68,7 @@ window.ShareSphereCloudinary = {
       }
     }
 
-    // 2. Upload to Shared Server /api/upload (accessible to all connected users)
+    // 2. Upload to Shared Backend Server /api/upload
     try {
       let base64Data = '';
       let filename = 'photo.jpg';
@@ -72,7 +85,8 @@ window.ShareSphereCloudinary = {
         });
       }
 
-      const res = await fetch('/api/upload', {
+      const uploadUrl = (window.SHARE_SPHERE_API_URL || '') + '/api/upload';
+      const res = await fetch(uploadUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename, data: base64Data })
@@ -89,7 +103,7 @@ window.ShareSphereCloudinary = {
       console.warn("Server upload failed, using data URL fallback:", err.message);
     }
 
-    // 3. Fallback to Base64 Data URL if offline
+    // 3. Fallback to Base64 Data URL
     if (typeof file === 'string') return file;
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -99,14 +113,14 @@ window.ShareSphereCloudinary = {
   }
 };
 
-// Initialize Firebase SDK instances
+// Initialize Firebase SDK instances (Firestore + RTDB + Auth)
 let fbApp = null;
 let fbAuth = null;
+let fbFirestore = null;
 let fbDatabase = null;
 
 try {
-  const hasFirebaseConfig = firebaseConfig.apiKey && firebaseConfig.authDomain &&
-    firebaseConfig.databaseURL && firebaseConfig.projectId && firebaseConfig.appId;
+  const hasFirebaseConfig = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
   if (hasFirebaseConfig && typeof firebase !== 'undefined' && firebase.initializeApp) {
     if (!firebase.apps || !firebase.apps.length) {
       fbApp = firebase.initializeApp(firebaseConfig);
@@ -114,8 +128,18 @@ try {
       fbApp = firebase.app();
     }
     fbAuth = firebase.auth();
-    fbDatabase = firebase.database();
-    console.log("🔥 Firebase Live SDK Connected (Realtime Database & Auth Active)!");
+    
+    // Cloud Firestore setup (Preferred for web apps)
+    if (typeof firebase.firestore === 'function') {
+      fbFirestore = firebase.firestore();
+      console.log("🔥 Cloud Firestore Connected (Live Multi-User Cloud Database)!");
+    }
+    
+    // Realtime Database setup (if databaseURL is present)
+    if (firebaseConfig.databaseURL && typeof firebase.database === 'function') {
+      fbDatabase = firebase.database();
+      console.log("🔥 Firebase Realtime Database Connected!");
+    }
   } else {
     console.info("⚡ Live Server API Mode Active (Shared Multi-User Database).");
   }
@@ -123,19 +147,113 @@ try {
   console.warn("Firebase Live Init notice:", err.message);
 }
 
+// 12 Initial Community Seed Donations (Fallback if database is brand new)
+const DEFAULT_SEED_DONATIONS = [
+  {
+    id: 'don_seed_001', donorId: 'usr_donor_priya', donorName: 'Priya Sharma',
+    donorAvatar: 'https://i.pravatar.cc/150?img=47', donorRating: 4.9,
+    title: 'Engineering Textbooks (3rd Year CSE)', category: 'Books',
+    description: 'Complete set of 3rd year CS textbooks — OS, DBMS, CN, Algorithms. All in excellent condition with highlighted notes.',
+    quantity: 6, condition: 'Like New', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9352, longitude: 77.6245, location: 'Koramangala, Bangalore',
+    expiryDate: null, requestsCount: 3, createdAt: new Date(Date.now() - 3600000).toISOString()
+  },
+  {
+    id: 'don_seed_002', donorId: 'usr_donor_rahul', donorName: 'Rahul Verma',
+    donorAvatar: 'https://i.pravatar.cc/150?img=12', donorRating: 4.8,
+    title: 'Fresh Home Cooked Meal (Serves 4)', category: 'Food',
+    description: 'Freshly prepared vegetarian rice, dal, and paneer curry. Hygienically packed in insulated containers. Extra from a family lunch.',
+    quantity: 4, condition: 'Fresh / New', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9716, longitude: 77.5946, location: 'MG Road, Bangalore',
+    expiryDate: new Date(Date.now() + 8 * 3600000).toISOString().split('T')[0], requestsCount: 1, createdAt: new Date(Date.now() - 1800000).toISOString()
+  },
+  {
+    id: 'don_seed_003', donorId: 'usr_donor_anita', donorName: 'Anita Desai',
+    donorAvatar: 'https://i.pravatar.cc/150?img=32', donorRating: 5.0,
+    title: 'Winter Jackets & Sweaters (Size L & XL)', category: 'Clothes',
+    description: '3 warm winter jackets and 2 woollen sweaters. Clean, dry-washed and folded. Perfect for cold weather relief.',
+    quantity: 5, condition: 'Good Condition', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9784, longitude: 77.6408, location: 'Indiranagar, Bangalore',
+    expiryDate: null, requestsCount: 7, createdAt: new Date(Date.now() - 7200000).toISOString()
+  },
+  {
+    id: 'don_seed_004', donorId: 'usr_donor_karthik', donorName: 'Karthik Nair',
+    donorAvatar: 'https://i.pravatar.cc/150?img=68', donorRating: 4.7,
+    title: 'Dell 22-inch Full HD Monitor (HDMI/VGA)', category: 'Electronics',
+    description: 'Working 22" 1080p desktop monitor. Great for students or work from home. Power adapter and HDMI cable included.',
+    quantity: 1, condition: 'Good Condition', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9250, longitude: 77.5938, location: 'Jayanagar, Bangalore',
+    expiryDate: null, requestsCount: 12, createdAt: new Date(Date.now() - 14400000).toISOString()
+  },
+  {
+    id: 'don_seed_005', donorId: 'usr_donor_meera', donorName: 'Meera Patel',
+    donorAvatar: 'https://i.pravatar.cc/150?img=26', donorRating: 4.9,
+    title: 'Wooden Study Table & Ergonomic Chair', category: 'Furniture',
+    description: 'Solid wood study desk with 2 drawers + adjustable mesh office chair. Slight scuff on desk corner, structurally 100% sound.',
+    quantity: 2, condition: 'Good Condition', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9900, longitude: 77.5500, location: 'Malleshwaram, Bangalore',
+    expiryDate: null, requestsCount: 9, createdAt: new Date(Date.now() - 28800000).toISOString()
+  },
+  {
+    id: 'don_seed_006', donorId: 'usr_donor_arjun', donorName: 'Arjun Reddy',
+    donorAvatar: 'https://i.pravatar.cc/150?img=53', donorRating: 5.0,
+    title: 'Kids Building Blocks & STEM Puzzles', category: 'Toys',
+    description: 'Full box of classic LEGO style building blocks (over 300 pieces) + 3 wooden brain teaser puzzles for ages 5-12.',
+    quantity: 4, condition: 'Like New', status: 'Available',
+    imageUrls: ['https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80'],
+    latitude: 12.9698, longitude: 77.7499, location: 'Whitefield, Bangalore',
+    expiryDate: null, requestsCount: 4, createdAt: new Date(Date.now() - 43200000).toISOString()
+  }
+];
+
 /**
- * Unified Repository with Live Server Database and Firebase Sync
+ * Unified Repository with Live Server Database, Cloud Firestore, and Cross-Account Bus
  */
 class ShareSphereStore {
   constructor() {
     this.STORAGE_KEY_PREFIX = 'sharesphere_';
     this.isSyncing = false;
-    
+    this.broadcastChannel = null;
+
+    // Cross-tab / Cross-profile Live Sync Bus
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        this.broadcastChannel = new BroadcastChannel('sharesphere_cross_account_bus');
+        this.broadcastChannel.onmessage = (event) => {
+          if (event && event.data && event.data.type === 'DATA_UPDATE') {
+            console.log(`📡 Broadcast received: [${event.data.collection}] updated by another account/tab.`);
+            this.handleCrossTabUpdate(event.data.collection, event.data.items);
+          }
+        };
+      } catch (e) {
+        console.warn('BroadcastChannel not supported:', e.message);
+      }
+    }
+
+    // Storage Event listener for cross-tab sync in identical origin
+    window.addEventListener('storage', (e) => {
+      if (e.key && e.key.startsWith(this.STORAGE_KEY_PREFIX)) {
+        const col = e.key.replace(this.STORAGE_KEY_PREFIX, '');
+        window.dispatchEvent(new CustomEvent('sharesphere_data_changed', { detail: { collection: col } }));
+      }
+    });
+
+    // Seed initial donations if empty
+    this.initDefaultSeedData();
+
     // Initial fetch from Server API
     this.syncAllFromAPI();
 
     // Start background live polling (3 second interval)
     this.startLiveSync();
+
+    // Sync from Cloud Firestore if configured
+    this.syncFromCloudFirestore();
 
     // Sync from Firebase RTDB if configured
     this.syncFromFirebaseRTDB();
@@ -147,15 +265,41 @@ class ShareSphereStore {
     });
   }
 
+  initDefaultSeedData() {
+    const existing = this.getCollection('donations');
+    if (!existing || existing.length === 0) {
+      this.setCollection('donations', DEFAULT_SEED_DONATIONS, true);
+    }
+  }
+
+  handleCrossTabUpdate(collectionName, newItems) {
+    if (!Array.isArray(newItems)) return;
+    localStorage.setItem(this.STORAGE_KEY_PREFIX + collectionName, JSON.stringify(newItems));
+    window.dispatchEvent(new CustomEvent('sharesphere_data_changed', { detail: { collection: collectionName } }));
+  }
+
   getCollection(name) {
-    const data = localStorage.getItem(this.STORAGE_KEY_PREFIX + name);
-    return data ? JSON.parse(data) : [];
+    try {
+      const data = localStorage.getItem(this.STORAGE_KEY_PREFIX + name);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      console.warn(`Error reading collection ${name}:`, e);
+      return [];
+    }
   }
 
   setCollection(name, items, silent = false) {
-    localStorage.setItem(this.STORAGE_KEY_PREFIX + name, JSON.stringify(items));
-    if (!silent) {
-      window.dispatchEvent(new CustomEvent('sharesphere_data_changed', { detail: { collection: name } }));
+    try {
+      localStorage.setItem(this.STORAGE_KEY_PREFIX + name, JSON.stringify(items));
+      if (!silent) {
+        window.dispatchEvent(new CustomEvent('sharesphere_data_changed', { detail: { collection: name } }));
+      }
+      // Broadcast to other tabs / accounts
+      if (this.broadcastChannel) {
+        this.broadcastChannel.postMessage({ type: 'DATA_UPDATE', collection: name, items });
+      }
+    } catch (e) {
+      console.warn(`Error saving collection ${name}:`, e);
     }
   }
 
@@ -165,26 +309,46 @@ class ShareSphereStore {
   }
 
   /**
-   * Sync collections from Server REST API
+   * Sync collections from Server REST API (Spring Boot, Express, or Vercel serverless)
    */
   async syncCollectionFromAPI(collectionName) {
     try {
-      const res = await fetch(`/api/data/${collectionName}`, { cache: 'no-cache' });
+      const baseUrl = window.SHARE_SPHERE_API_URL || '';
+      const url = `${baseUrl}/api/data/${collectionName}`;
+      const res = await fetch(url, { cache: 'no-cache' });
       if (!res.ok) return;
       const json = await res.json();
       if (json && json.success && Array.isArray(json.data)) {
         const localItems = this.getCollection(collectionName);
-        const serverJson = JSON.stringify(json.data);
+        
+        // Merge strategy: Union remote items with local unique items
+        const remoteMap = new Map();
+        json.data.forEach(item => {
+          if (item && item.id) remoteMap.set(item.id, item);
+        });
+
+        // Add any local items not yet on the server
+        localItems.forEach(item => {
+          if (item && item.id && !remoteMap.has(item.id)) {
+            remoteMap.set(item.id, item);
+          }
+        });
+
+        const mergedItems = Array.from(remoteMap.values());
+        
+        // Sort newest first
+        mergedItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+        const serverJson = JSON.stringify(mergedItems);
         const localJson = JSON.stringify(localItems);
 
-        // Update if server has newer or different data
         if (serverJson !== localJson) {
-          this.setCollection(collectionName, json.data, false);
-          console.log(`🔄 Synced ${json.data.length} ${collectionName} from shared server database`);
+          this.setCollection(collectionName, mergedItems, false);
+          console.log(`🔄 Synced ${mergedItems.length} ${collectionName} across accounts from shared backend.`);
         }
       }
     } catch (err) {
-      // Offline fallback
+      // Offline fallback: continue with local cache
     }
   }
 
@@ -206,7 +370,7 @@ class ShareSphereStore {
 
   startLiveSync() {
     setInterval(() => {
-      // Periodic check for new donations uploaded by other users/friends
+      // Periodic live polling for new items uploaded by other accounts/users
       this.syncCollectionFromAPI('donations');
       this.syncCollectionFromAPI('requests');
       this.syncCollectionFromAPI('notifications');
@@ -225,9 +389,10 @@ class ShareSphereStore {
     items.unshift(newItem);
     this.setCollection(name, items);
 
-    // Save to Shared Server API
+    // 1. Save to Shared Backend Server (Java Spring Boot, Express, or Vercel serverless)
     try {
-      const res = await fetch(`/api/data/${name}`, {
+      const baseUrl = window.SHARE_SPHERE_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/data/${name}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newItem)
@@ -235,14 +400,24 @@ class ShareSphereStore {
       if (res.ok) {
         const json = await res.json();
         if (json.item) {
-          console.log(`🌐 Item saved to shared server database: [${name}/${json.item.id}]`);
+          console.log(`🌐 Item saved globally to shared backend: [${name}/${json.item.id}]`);
         }
       }
     } catch (err) {
-      console.warn(`Server API write notice: ${err.message}. Saved locally.`);
+      console.warn(`Backend API write notice: ${err.message}. Saved locally & queued for sync.`);
     }
 
-    // Sync to live Firebase Realtime Database if configured
+    // 2. Save to Cloud Firestore (Real-time Cloud Database without donorId filtering)
+    if (fbFirestore) {
+      try {
+        await fbFirestore.collection(name).doc(newItem.id).set(newItem);
+        console.log(`🔥 Synced to Cloud Firestore collection [${name}/${newItem.id}]`);
+      } catch (e) {
+        console.warn(`Firestore write notice: ${e.message}`);
+      }
+    }
+
+    // 3. Save to Firebase Realtime Database if configured
     if (fbDatabase) {
       try {
         await fbDatabase.ref(`${name}/${newItem.id}`).set(newItem);
@@ -262,9 +437,10 @@ class ShareSphereStore {
       items[index] = { ...items[index], ...updates, updatedAt: new Date().toISOString() };
       this.setCollection(name, items);
 
-      // Save to Shared Server API
+      // 1. Save update to Shared Backend Server
       try {
-        await fetch(`/api/data/${name}/${id}`, {
+        const baseUrl = window.SHARE_SPHERE_API_URL || '';
+        await fetch(`${baseUrl}/api/data/${name}/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updates)
@@ -273,7 +449,16 @@ class ShareSphereStore {
         console.warn(`Server API update notice: ${err.message}`);
       }
 
-      // Sync update to Firebase
+      // 2. Sync update to Cloud Firestore
+      if (fbFirestore) {
+        try {
+          await fbFirestore.collection(name).doc(id).set(updates, { merge: true });
+        } catch (e) {
+          console.warn(`Firestore update notice: ${e.message}`);
+        }
+      }
+
+      // 3. Sync update to Firebase RTDB
       if (fbDatabase) {
         try {
           await fbDatabase.ref(`${name}/${id}`).update(updates);
@@ -292,16 +477,26 @@ class ShareSphereStore {
     const filtered = items.filter(item => item.id !== id);
     this.setCollection(name, filtered);
 
-    // Remove from Shared Server API
+    // 1. Remove from Shared Backend Server
     try {
-      await fetch(`/api/data/${name}/${id}`, {
+      const baseUrl = window.SHARE_SPHERE_API_URL || '';
+      await fetch(`${baseUrl}/api/data/${name}/${id}`, {
         method: 'DELETE'
       });
     } catch (err) {
       console.warn(`Server API delete notice: ${err.message}`);
     }
 
-    // Remove from Firebase
+    // 2. Remove from Cloud Firestore
+    if (fbFirestore) {
+      try {
+        await fbFirestore.collection(name).doc(id).delete();
+      } catch (e) {
+        console.warn(`Firestore delete notice: ${e.message}`);
+      }
+    }
+
+    // 3. Remove from Firebase RTDB
     if (fbDatabase) {
       try {
         await fbDatabase.ref(`${name}/${id}`).remove();
@@ -311,6 +506,34 @@ class ShareSphereStore {
     }
 
     return true;
+  }
+
+  /**
+   * Pull live data from Cloud Firestore (Realtime snapshot listener on public collections)
+   */
+  async syncFromCloudFirestore() {
+    if (!fbFirestore) return;
+    const collections = ['donations', 'users', 'requests', 'notifications', 'reports'];
+
+    for (const col of collections) {
+      try {
+        // Listening to full collection WITHOUT filtering by donorId (public feed)
+        fbFirestore.collection(col).onSnapshot((snapshot) => {
+          const remoteItems = [];
+          snapshot.forEach(doc => {
+            remoteItems.push(doc.data());
+          });
+          if (remoteItems.length > 0) {
+            console.log(`🔥 Firestore Snapshot: Received ${remoteItems.length} items for [${col}]`);
+            this.setCollection(col, remoteItems);
+          }
+        }, (error) => {
+          console.warn(`Firestore live snapshot notice for [${col}]:`, error.message);
+        });
+      } catch (err) {
+        console.warn(`Firestore setup error for [${col}]:`, err.message);
+      }
+    }
   }
 
   /**
@@ -330,7 +553,7 @@ class ShareSphereStore {
           }
         });
       } catch (err) {
-        // pass
+        console.warn(`Firebase RTDB sync error:`, err);
       }
     }
   }

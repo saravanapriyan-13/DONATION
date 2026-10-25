@@ -82,9 +82,25 @@ function setupCategorySelection() {
   });
 }
 
-// Global Step Switcher
+// Global Step Switcher with Strict Sequential Validation
 window.goToWizardStep = function(stepNumber) {
   if (stepNumber < 1 || stepNumber > 5) return;
+
+  // Prevent navigation while photos are uploading
+  if (window.isUploadingPhotos) {
+    window.ShareSphereUtils.showToast('Please wait for photos to finish uploading.', 'warning');
+    return;
+  }
+
+  // Prevent skipping: Validate all intermediate steps before jumping forward
+  if (stepNumber > currentWizardStep) {
+    for (let s = currentWizardStep; s < stepNumber; s++) {
+      if (!validateCurrentStep(s)) {
+        return; // stay on invalid step
+      }
+    }
+  }
+
   currentWizardStep = stepNumber;
 
   // Update step cards visibility
@@ -122,6 +138,10 @@ window.goToWizardStep = function(stepNumber) {
 
 // Global Next Step Handler
 window.handleWizardNext = function() {
+  if (window.isUploadingPhotos) {
+    window.ShareSphereUtils.showToast('Photos are currently uploading. Please wait a moment...', 'warning');
+    return;
+  }
   if (validateCurrentStep(currentWizardStep)) {
     window.goToWizardStep(currentWizardStep + 1);
   }
@@ -160,20 +180,31 @@ function validateCurrentStep(step) {
   }
 
   if (step === 2) {
-    const title = document.getElementById('form-title')?.value.trim();
-    const desc = document.getElementById('form-description')?.value.trim();
-    const qty = parseInt(document.getElementById('form-quantity')?.value) || 1;
-    const cond = document.getElementById('form-condition')?.value || 'Good Condition';
+    const titleInput = document.getElementById('form-title');
+    const descInput = document.getElementById('form-description');
+    const qtyInput = document.getElementById('form-quantity');
+    const condInput = document.getElementById('form-condition');
+
+    const title = titleInput?.value.trim();
+    const desc = descInput?.value.trim();
+    const qty = parseInt(qtyInput?.value) || 0;
+    const cond = condInput?.value || 'Good Condition';
 
     if (!title || title.length < 3) {
-      window.ShareSphereUtils.showToast('Please enter a clear item title.', 'warning');
-      document.getElementById('form-title')?.focus();
+      window.ShareSphereUtils.showToast('Please enter an item title (at least 3 characters).', 'warning');
+      titleInput?.focus();
       return false;
     }
 
-    if (!desc || desc.length < 5) {
-      window.ShareSphereUtils.showToast('Please provide a short description.', 'warning');
-      document.getElementById('form-description')?.focus();
+    if (!desc || desc.length < 8) {
+      window.ShareSphereUtils.showToast('Please provide a helpful description (at least 8 characters).', 'warning');
+      descInput?.focus();
+      return false;
+    }
+
+    if (qty < 1) {
+      window.ShareSphereUtils.showToast('Quantity must be at least 1.', 'warning');
+      qtyInput?.focus();
       return false;
     }
 
@@ -183,9 +214,19 @@ function validateCurrentStep(step) {
     donationFormData.condition = cond;
 
     if (donationFormData.category === 'Food') {
-      const exp = document.getElementById('form-expiry')?.value;
+      const expInput = document.getElementById('form-expiry');
+      const exp = expInput?.value;
       if (!exp) {
-        window.ShareSphereUtils.showToast('Please provide an expiry or best-before date for food.', 'warning');
+        window.ShareSphereUtils.showToast('Food Expiry / Best Before Date is mandatory.', 'warning');
+        expInput?.focus();
+        return false;
+      }
+      const expDate = new Date(exp);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (expDate < today) {
+        window.ShareSphereUtils.showToast('Food expiry date cannot be in the past.', 'error');
+        expInput?.focus();
         return false;
       }
       donationFormData.expiryDate = exp;
@@ -196,22 +237,40 @@ function validateCurrentStep(step) {
   }
 
   if (step === 3) {
-    if (donationFormData.images.length === 0) {
-      // Default placeholder if none uploaded
-      donationFormData.images = [
-        'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=600&q=80'
-      ];
+    if (window.isUploadingPhotos) {
+      window.ShareSphereUtils.showToast('Photos are still uploading. Please wait...', 'warning');
+      return false;
+    }
+    // High-resolution category-tailored default image if donor uploaded no photos
+    if (!donationFormData.images || donationFormData.images.length === 0) {
+      const fallbackImages = {
+        'Food': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        'Clothes': 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80',
+        'Books': 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80',
+        'Electronics': 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=600&q=80',
+        'Furniture': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=600&q=80',
+        'Toys': 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80',
+        'Other': 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=600&q=80'
+      };
+      donationFormData.images = [fallbackImages[donationFormData.category] || fallbackImages['Other']];
     }
     return true;
   }
 
   if (step === 4) {
-    const loc = document.getElementById('form-location-name')?.value.trim();
-    if (!loc) {
-      window.ShareSphereUtils.showToast('Please provide a neighborhood or landmark.', 'warning');
+    const locInput = document.getElementById('form-location-name');
+    const loc = locInput?.value.trim();
+    if (!loc || loc.length < 3) {
+      window.ShareSphereUtils.showToast('Please enter your neighborhood area or landmark.', 'warning');
+      locInput?.focus();
       return false;
     }
     donationFormData.location = loc;
+    if (!donationFormData.latitude || !donationFormData.longitude) {
+      const userLoc = window.ShareSphereLocation ? window.ShareSphereLocation.getUserLocation() : null;
+      donationFormData.latitude = (userLoc && userLoc.lat) || 12.9716;
+      donationFormData.longitude = (userLoc && userLoc.lng) || 77.5946;
+    }
     return true;
   }
 
@@ -219,8 +278,10 @@ function validateCurrentStep(step) {
 }
 
 /**
- * Cloudinary Integrated Image Uploader
+ * Cloudinary Integrated Image Uploader with Race Condition Prevention
  */
+window.isUploadingPhotos = false;
+
 function setupImageUploader() {
   const dropzone = document.getElementById('upload-dropzone');
   const fileInput = document.getElementById('image-file-input');
@@ -228,11 +289,14 @@ function setupImageUploader() {
 
   if (!dropzone || !fileInput) return;
 
-  dropzone.onclick = () => fileInput.click();
+  dropzone.onclick = () => {
+    if (window.isUploadingPhotos) return;
+    fileInput.click();
+  };
 
   dropzone.ondragover = (e) => {
     e.preventDefault();
-    dropzone.classList.add('dragover');
+    if (!window.isUploadingPhotos) dropzone.classList.add('dragover');
   };
 
   dropzone.ondragleave = () => {
@@ -242,6 +306,7 @@ function setupImageUploader() {
   dropzone.ondrop = (e) => {
     e.preventDefault();
     dropzone.classList.remove('dragover');
+    if (window.isUploadingPhotos) return;
     if (e.dataTransfer.files && e.dataTransfer.files.length) {
       processUploadedFiles(e.dataTransfer.files);
     }
@@ -253,30 +318,65 @@ function setupImageUploader() {
     }
   };
 
-  async function processUploadedFiles(files) {
+  function setUploadLockState(isUploading, text = 'Uploading photos...') {
+    window.isUploadingPhotos = isUploading;
     const uploadStatus = document.getElementById('upload-status-indicator');
-    if (uploadStatus) {
-      uploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm text-primary"></span> Uploading to Cloudinary...';
-      uploadStatus.style.display = 'block';
+    const step3Btns = document.querySelectorAll('#wizard-step-3 button, [data-wizard-next]');
+    const publishBtn = document.getElementById('btn-publish-donation');
+
+    step3Btns.forEach(btn => {
+      btn.disabled = isUploading;
+      if (isUploading && btn.classList.contains('btn-primary-custom')) {
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Uploading Photos...';
+      } else if (!isUploading && btn.dataset.originalText) {
+        btn.innerHTML = btn.dataset.originalText;
+      }
+    });
+
+    if (publishBtn) publishBtn.disabled = isUploading;
+    if (dropzone) {
+      dropzone.style.pointerEvents = isUploading ? 'none' : 'auto';
+      dropzone.style.opacity = isUploading ? '0.6' : '1';
     }
 
-    for (const file of Array.from(files)) {
-      if (!file.type.startsWith('image/')) continue;
-      
+    if (uploadStatus) {
+      if (isUploading) {
+        uploadStatus.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-2"></span> ${text}`;
+        uploadStatus.style.display = 'block';
+      } else {
+        uploadStatus.style.display = 'none';
+      }
+    }
+  }
+
+  async function processUploadedFiles(files) {
+    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (validFiles.length === 0) return;
+
+    setUploadLockState(true, `Uploading ${validFiles.length} photo(s) to Cloudinary...`);
+
+    let uploadedCount = 0;
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      setUploadLockState(true, `Uploading photo (${i + 1} of ${validFiles.length}) to Cloudinary...`);
       try {
-        window.ShareSphereUtils.showToast('☁️ Uploading photo to Cloudinary...', 'info');
         const secureUrl = await window.ShareSphereCloudinary.upload(file);
-        donationFormData.images.push(secureUrl);
-        window.ShareSphereUtils.showToast('✓ Photo uploaded to Cloudinary successfully!', 'success');
+        if (secureUrl) {
+          // If default placeholder was auto-assigned earlier, clear it
+          if (donationFormData.images.length === 1 && donationFormData.images[0].includes('unsplash.com')) {
+            donationFormData.images = [];
+          }
+          donationFormData.images.push(secureUrl);
+          uploadedCount++;
+        }
       } catch (err) {
-        console.warn('Upload fallback:', err);
+        console.warn('Upload error for file:', err);
       }
     }
 
-    if (uploadStatus) {
-      uploadStatus.style.display = 'none';
-    }
-
+    setUploadLockState(false);
+    window.ShareSphereUtils.showToast(`✓ ${uploadedCount} photo(s) uploaded successfully!`, 'success');
     renderImagePreviews();
   }
 
@@ -350,44 +450,65 @@ function populateReviewSummary() {
       <p class="small text-muted mb-3">${donationFormData.description}</p>
       <div class="p-3 rounded-3 bg-white border d-flex align-items-center justify-content-between small text-muted">
         <div>Donor: <b class="text-dark">${user ? user.name : 'Community Member'}</b></div>
-        <div>Stored: <span class="badge bg-success-subtle text-success"><i class="bi bi-cloud-check"></i> Cloudinary & Firebase</span></div>
+        <div>Network: <span class="badge bg-success-subtle text-success"><i class="bi bi-broadcast"></i> Live Multi-User Sync</span></div>
       </div>
     </div>
   `;
 }
 
+let isPublishingDonation = false;
+
 async function handlePublishDonation() {
-  const btn = document.getElementById('btn-publish-donation');
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Publishing to Firebase Database...';
+  // Prevent duplicate submissions / debouncing guard
+  if (isPublishingDonation) return;
+
+  // Validate all steps strictly
+  for (let s = 1; s <= 4; s++) {
+    if (!validateCurrentStep(s)) {
+      window.goToWizardStep(s);
+      return;
+    }
   }
 
-  const user = window.ShareSphereAuth.getCurrentUser();
-  const newDonation = {
-    donorId: user ? user.id : 'user_guest',
-    donorName: user ? user.name : 'Community Donor',
-    donorAvatar: user ? user.avatar : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-    donorRating: user ? user.rating || 5.0 : 5.0,
-    title: donationFormData.title,
-    description: donationFormData.description,
-    category: donationFormData.category,
-    quantity: donationFormData.quantity,
-    condition: donationFormData.condition,
-    imageUrls: donationFormData.images,
-    latitude: donationFormData.latitude,
-    longitude: donationFormData.longitude,
-    location: donationFormData.location,
-    expiryDate: donationFormData.expiryDate,
-    status: 'Available',
-    requestsCount: 0
-  };
+  if (window.isUploadingPhotos) {
+    window.ShareSphereUtils.showToast('Please wait for photos to finish uploading.', 'warning');
+    return;
+  }
 
-  // Insert into unified store and live Firebase Realtime Database
-  await window.ShareSphereDB.insert('donations', newDonation);
+  const user = window.ShareSphereAuth.requireAuth();
+  if (!user) return;
 
-  // Update user points
-  if (user) {
+  const btn = document.getElementById('btn-publish-donation');
+  isPublishingDonation = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Broadcasting to Community Network...';
+  }
+
+  try {
+    const newDonation = {
+      donorId: user.id,
+      donorName: user.name,
+      donorAvatar: user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+      donorRating: user.rating || 5.0,
+      title: donationFormData.title,
+      description: donationFormData.description,
+      category: donationFormData.category,
+      quantity: donationFormData.quantity,
+      condition: donationFormData.condition,
+      imageUrls: donationFormData.images,
+      latitude: donationFormData.latitude,
+      longitude: donationFormData.longitude,
+      location: donationFormData.location,
+      expiryDate: donationFormData.expiryDate,
+      status: 'Available',
+      requestsCount: 0
+    };
+
+    // Save to shared database (Spring Boot, Express, or Cloud Firestore)
+    await window.ShareSphereDB.insert('donations', newDonation);
+
+    // Award +50 impact points ONCE
     const currentPoints = (user.points || 0) + 50;
     const currentDonCount = (user.donationsCount || 0) + 1;
     await window.ShareSphereDB.update('users', user.id, { 
@@ -397,18 +518,26 @@ async function handlePublishDonation() {
     user.points = currentPoints;
     user.donationsCount = currentDonCount;
     window.ShareSphereAuth.setCurrentUser(user);
+
+    // Celebration
+    if (typeof confetti === 'function') {
+      confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+    }
+
+    window.ShareSphereUtils.showToast('🎉 Donation published! Visible to all users across the platform.', 'success');
+
+    setTimeout(() => {
+      window.location.href = 'explore.html';
+    }, 1200);
+  } catch (error) {
+    console.error('Failed to publish donation:', error);
+    window.ShareSphereUtils.showToast('Failed to publish donation. Please try again.', 'error');
+    isPublishingDonation = false;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-check-circle-fill"></i> Publish Donation Now';
+    }
   }
-
-  // Confetti celebration
-  if (typeof confetti === 'function') {
-    confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
-  }
-
-  window.ShareSphereUtils.showToast('🎉 Your item is live! Visible to all users & friends across the platform!', 'success');
-
-  setTimeout(() => {
-    window.location.href = 'explore.html';
-  }, 1200);
 }
 
 /* ==========================================================================

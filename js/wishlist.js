@@ -5,6 +5,18 @@
 document.addEventListener('DOMContentLoaded', () => {
   renderWishlistItems();
   window.addEventListener('sharesphere_wishlist_updated', renderWishlistItems);
+  window.addEventListener('sharesphere_data_changed', (e) => {
+    if (!e.detail || e.detail.collection === 'donations') {
+      renderWishlistItems();
+    }
+  });
+
+  // Pull fresh data if available
+  if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+    window.ShareSphereDB.syncAllFromAPI().then(() => {
+      renderWishlistItems();
+    });
+  }
 });
 
 function renderWishlistItems() {

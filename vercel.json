@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "^/api/data/(?<collection>[^/]+)/(?<id>[^/]+)$",
+      "dest": "/api/data?collection=$collection&id=$id"
+    },
+    {
+      "src": "^/api/data/(?<collection>[^/]+)$",
+      "dest": "/api/data?collection=$collection"
+    },
+    {
+      "src": "^/api/upload$",
+      "dest": "/api/data?action=upload"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

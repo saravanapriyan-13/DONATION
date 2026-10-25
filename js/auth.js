@@ -256,7 +256,9 @@ window.ShareSphereAuth = {
   requireAuth() {
     const user = this.getCurrentUser();
     if (!user) {
-      window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname)}`;
+      const pageName = window.location.pathname.split('/').pop() || 'index.html';
+      const search = window.location.search || '';
+      window.location.href = `login.html?redirect=${encodeURIComponent(pageName + search)}`;
     }
     return user;
   },
@@ -310,6 +312,11 @@ window.ShareSphereAuth = {
     } else {
       container.innerHTML = `
         <div class="d-flex align-items-center gap-2">
+          <!-- Saved / Wishlist for Guests -->
+          <a href="wishlist.html" class="nav-icon-btn text-decoration-none me-1" title="Saved Resources">
+            <i class="bi bi-heart"></i>
+            <span class="badge-counter" id="nav-wishlist-count" style="display: none;">0</span>
+          </a>
           <a href="login.html" class="btn btn-secondary-custom">Log In</a>
           <a href="register.html" class="btn btn-primary-custom">Join Community</a>
         </div>

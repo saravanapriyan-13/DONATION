@@ -162,9 +162,9 @@ function getFilteredResources() {
     donations = donations.filter(d => d.condition === conditionVal);
   }
 
-  // Availability
+  // Availability (case-insensitive check for 'AVAILABLE')
   if (availabilityVal === 'Available') {
-    donations = donations.filter(d => d.status === 'Available');
+    donations = donations.filter(d => (d.status || '').toUpperCase() === 'AVAILABLE');
   }
 
   // Sorting
@@ -208,6 +208,16 @@ function renderExploreResources() {
   }
 }
 
+window.toggleCardWishlist = function(event, btn, itemId) {
+  if (window.ShareSphereUtils && typeof window.ShareSphereUtils.handleCardWishlistClick === 'function') {
+    return window.ShareSphereUtils.handleCardWishlistClick(event, btn, itemId);
+  }
+  if (event) event.stopPropagation();
+  window.ShareSphereUtils.toggleWishlist(itemId);
+  const active = btn.classList.toggle('active');
+  btn.innerHTML = '<i class="bi ' + (active ? 'bi-heart-fill' : 'bi-heart') + '"></i>';
+};
+
 /**
  * Flipkart/Amazon style product card
  */
@@ -223,12 +233,15 @@ function renderProductCard(item, userLoc) {
   const statusClass = (item.status || '').toLowerCase();
   const timeAgo = window.ShareSphereUtils.timeAgo(item.createdAt);
 
+  const currentUser = window.ShareSphereAuth ? window.ShareSphereAuth.getCurrentUser() : null;
+  const isMyListing = currentUser && item.donorId && currentUser.id === item.donorId;
+
   return '<div class="product-card">' +
     '<div class="product-card-img-wrap">' +
       '<img src="' + imgUrl + '" alt="' + (item.title || '') + '" loading="lazy" onclick="window.location.href=\'donation-details.html?id=' + item.id + '\'">' +
       '<span class="product-card-badge-free">FREE</span>' +
       '<span class="product-card-cat-icon">' + meta.icon + '</span>' +
-      '<button class="product-wishlist-btn ' + (isSaved ? 'active' : '') + '" title="Save" onclick="window.ShareSphereUtils.toggleWishlist(\'' + item.id + '\'); this.classList.toggle(\'active\'); this.innerHTML=this.classList.contains(\'active\') ? \'<i class=\\\"bi bi-heart-fill\\\"></i>\' : \'<i class=\\\"bi bi-heart\\\"></i>\'">' +
+      '<button class="product-wishlist-btn ' + (isSaved ? 'active' : '') + '" title="Save" onclick="window.toggleCardWishlist(event, this, \'' + item.id + '\')">' +
         '<i class="bi ' + (isSaved ? 'bi-heart-fill' : 'bi-heart') + '"></i>' +
       '</button>' +
     '</div>' +
@@ -237,6 +250,7 @@ function renderProductCard(item, userLoc) {
       '<div class="product-card-meta d-flex align-items-center gap-2 flex-wrap">' +
         '<span class="cond-badge">' + (item.condition || '') + '</span>' +
         '<span class="status-chip ' + statusClass + '">' + (item.status || '') + '</span>' +
+        (isMyListing ? '<span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">Your Item</span>' : '') +
         (item.quantity > 1 ? '<span style="font-size:0.7rem;color:#666;">Qty: ' + item.quantity + '</span>' : '') +
       '</div>' +
       '<div class="product-card-location mb-2">' +
@@ -247,12 +261,14 @@ function renderProductCard(item, userLoc) {
       '<div class="product-card-donor">' +
         '<img src="' + (item.donorAvatar || 'https://i.pravatar.cc/150?img=1') + '" alt="' + (item.donorName || '') + '" onerror="this.src=\'https://i.pravatar.cc/150?img=1\'">' +
         '<div>' +
-          '<div class="product-card-donor-name">' + (item.donorName || 'Community Donor') + '</div>' +
+          '<div class="product-card-donor-name">' + (item.donorName || 'Community Donor') + (isMyListing ? ' (You)' : '') + '</div>' +
           '<div class="product-card-rating" style="color:#f9a825;font-size:0.68rem;">' + stars + ' ' + (item.donorRating || '5.0') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
-    '<a href="donation-details.html?id=' + item.id + '" class="product-card-btn primary-btn">VIEW &amp; REQUEST &rarr;</a>' +
+    (isMyListing 
+      ? '<a href="donations.html" class="product-card-btn" style="background:#475569;letter-spacing:0.3px;"><i class="bi bi-box2-heart"></i> YOUR LISTING &bull; MANAGE</a>'
+      : '<a href="donation-details.html?id=' + item.id + '" class="product-card-btn primary-btn">VIEW &amp; REQUEST &rarr;</a>') +
   '</div>';
 }
 

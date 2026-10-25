@@ -113,8 +113,12 @@ window.ShareSphereUtils = {
   getWishlist() {
     const user = window.ShareSphereAuth ? window.ShareSphereAuth.getCurrentUser() : null;
     const key = 'sharesphere_wishlist_' + (user ? user.id : 'guest');
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : [];
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : [];
+    } catch (err) {
+      return [];
+    }
   },
 
   toggleWishlist(donationId) {
@@ -133,9 +137,32 @@ window.ShareSphereUtils = {
       this.showToast('Removed from saved resources', 'info');
     }
 
-    localStorage.setItem(key, JSON.stringify(list));
+    try {
+      localStorage.setItem(key, JSON.stringify(list));
+    } catch (err) {
+      console.warn('LocalStorage error saving wishlist:', err);
+    }
     this.updateNavbarCounters();
-    window.dispatchEvent(new CustomEvent('sharesphere_wishlist_updated'));
+    window.dispatchEvent(new CustomEvent('sharesphere_wishlist_updated', { detail: { donationId, added } }));
+    return added;
+  },
+
+  handleCardWishlistClick(event, btn, itemId) {
+    if (event) {
+      if (typeof event.stopPropagation === 'function') event.stopPropagation();
+      if (typeof event.preventDefault === 'function') event.preventDefault();
+    }
+    const added = this.toggleWishlist(itemId);
+    if (btn) {
+      const icon = btn.querySelector('i');
+      if (added) {
+        btn.classList.add('active');
+        if (icon) icon.className = 'bi bi-heart-fill';
+      } else {
+        btn.classList.remove('active');
+        if (icon) icon.className = 'bi bi-heart';
+      }
+    }
     return added;
   },
 
@@ -166,20 +193,20 @@ window.ShareSphereUtils = {
    */
   updateNavbarCounters() {
     const wishlistCount = this.getWishlist().length;
-    const wishlistBadge = document.getElementById('nav-wishlist-count');
-    if (wishlistBadge) {
-      wishlistBadge.textContent = wishlistCount;
-      wishlistBadge.style.display = wishlistCount > 0 ? 'flex' : 'none';
-    }
+    const wishlistBadges = document.querySelectorAll('#nav-wishlist-count, .nav-wishlist-count-badge');
+    wishlistBadges.forEach(badge => {
+      badge.textContent = wishlistCount;
+      badge.style.display = wishlistCount > 0 ? 'flex' : 'none';
+    });
 
     const user = window.ShareSphereAuth ? window.ShareSphereAuth.getCurrentUser() : null;
     if (user && window.ShareSphereDB) {
       const notifs = window.ShareSphereDB.getCollection('notifications').filter(n => n.userId === user.id && !n.isRead);
-      const notifBadge = document.getElementById('nav-notif-count');
-      if (notifBadge) {
-        notifBadge.textContent = notifs.length;
-        notifBadge.style.display = notifs.length > 0 ? 'flex' : 'none';
-      }
+      const notifBadges = document.querySelectorAll('#nav-notif-count, .nav-notif-count-badge');
+      notifBadges.forEach(badge => {
+        badge.textContent = notifs.length;
+        badge.style.display = notifs.length > 0 ? 'flex' : 'none';
+      });
     }
   },
 
@@ -204,7 +231,7 @@ window.ShareSphereUtils = {
             </span>
             <button class="wishlist-btn-corner ${isSaved ? 'active' : ''}" 
                     title="Save to Wishlist" 
-                    onclick="window.ShareSphereUtils.toggleWishlist('${item.id}'); this.classList.toggle('active');">
+                    onclick="window.ShareSphereUtils.handleCardWishlistClick(event, this, '${item.id}')">
               <i class="bi ${isSaved ? 'bi-heart-fill' : 'bi-heart'}"></i>
             </button>
             <img src="${imgUrl}" alt="${item.title}" loading="lazy">

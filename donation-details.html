@@ -37,6 +37,7 @@
           <li class="nav-item"><a class="nav-link" href="donate.html"><i class="bi bi-plus-circle"></i> Donate</a></li>
           <li class="nav-item"><a class="nav-link" href="requests.html"><i class="bi bi-arrow-left-right"></i> My Requests</a></li>
           <li class="nav-item"><a class="nav-link" href="donations.html"><i class="bi bi-box2-heart"></i> My Donations</a></li>
+          <li class="nav-item"><a class="nav-link" href="wishlist.html"><i class="bi bi-heart"></i> Saved</a></li>
           <li class="nav-item"><a class="nav-link" href="impact.html"><i class="bi bi-globe-americas"></i> Impact</a></li>
         </ul>
 
@@ -234,6 +235,7 @@
   <!-- Firebase Official SDK (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
   <!-- ShareSphere Core Scripts -->
@@ -341,18 +343,53 @@
       document.getElementById('detail-donor-rating').innerHTML = `<i class="bi bi-star-fill"></i> ${d.donorRating || '4.9'} Community Rating`;
 
       // Wishlist button state
+      updateDetailWishlistUI(window.ShareSphereUtils.isInWishlist(d.id));
+
+      // Check if viewing user is the donor or if item is no longer available
+      const reqBtn = document.getElementById('btn-open-request-modal');
+      const currentUser = window.ShareSphereAuth.getCurrentUser();
+      const isOwner = currentUser && (String(currentUser.id) === String(d.donorId));
+
+      if (reqBtn) {
+        if (isOwner) {
+          reqBtn.outerHTML = `
+            <a href="donations.html" class="btn btn-outline-primary w-100 py-3 mb-2 fs-6 fw-bold shadow-xs">
+              <i class="bi bi-box2-heart"></i> Manage Your Donation Listing
+            </a>
+          `;
+          const repBtn = document.getElementById('btn-open-report-modal');
+          if (repBtn) repBtn.style.display = 'none';
+        } else if ((d.status || '').toUpperCase() !== 'AVAILABLE') {
+          reqBtn.disabled = true;
+          reqBtn.className = 'btn btn-secondary w-100 py-3 mb-2 fs-6 disabled';
+          reqBtn.innerHTML = `<i class="bi bi-lock-fill"></i> Resource ${d.status}`;
+        }
+      }
+    }
+
+    function updateDetailWishlistUI(isSaved) {
       const wishBtn = document.getElementById('btn-detail-wishlist');
-      if (window.ShareSphereUtils.isInWishlist(d.id)) {
+      if (!wishBtn) return;
+      if (isSaved) {
         wishBtn.innerHTML = '<i class="bi bi-heart-fill text-danger"></i> Saved';
+        wishBtn.className = 'btn btn-sm btn-light border border-danger text-danger rounded-pill fw-semibold shadow-xs';
+      } else {
+        wishBtn.innerHTML = '<i class="bi bi-heart"></i> Save';
+        wishBtn.className = 'btn btn-sm btn-outline-secondary rounded-pill';
       }
     }
 
     function toggleDetailWishlist() {
       if (!activeDonation) return;
       const added = window.ShareSphereUtils.toggleWishlist(activeDonation.id);
-      const btn = document.getElementById('btn-detail-wishlist');
-      btn.innerHTML = added ? '<i class="bi bi-heart-fill text-danger"></i> Saved' : '<i class="bi bi-heart"></i> Save';
+      updateDetailWishlistUI(added);
     }
+
+    window.addEventListener('sharesphere_wishlist_updated', (e) => {
+      if (activeDonation && e.detail && e.detail.donationId === activeDonation.id) {
+        updateDetailWishlistUI(e.detail.added);
+      }
+    });
 
     function renderRelatedResources(current) {
       const container = document.getElementById('detail-related-grid');
