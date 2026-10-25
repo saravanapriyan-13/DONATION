@@ -108,6 +108,36 @@ window.ShareSphereUtils = {
   },
 
   /**
+   * Synchronized Platform Environmental Impact Metrics
+   * Harmonizes homepage index.html stats and impact.html dashboard
+   */
+  getPlatformImpactMetrics(donations = []) {
+    const BASE_ITEMS_REUSED = 3200;
+    const BASE_PEOPLE_HELPED = 5800;
+    const BASE_WASTE_KG = 4850.0;
+    const BASE_CO2_KG = 7240.0;
+
+    let dynamicItems = 0;
+    let dynamicWaste = 0;
+    let dynamicCO2 = 0;
+
+    (donations || []).forEach(item => {
+      const count = parseInt(item.quantity) || 1;
+      const meta = this.getCategoryMeta(item.category);
+      dynamicItems += count;
+      dynamicWaste += count * (meta.weightKg || 1.0);
+      dynamicCO2 += count * (meta.co2Kg || 2.0);
+    });
+
+    return {
+      itemsReused: BASE_ITEMS_REUSED + dynamicItems,
+      estimatedWasteKg: parseFloat((BASE_WASTE_KG + dynamicWaste).toFixed(1)),
+      estimatedCO2eKg: parseFloat((BASE_CO2_KG + dynamicCO2).toFixed(1)),
+      peopleHelped: BASE_PEOPLE_HELPED + Math.round(dynamicItems * 1.6)
+    };
+  },
+
+  /**
    * Wishlist Helper
    */
   getWishlist() {

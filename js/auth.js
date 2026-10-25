@@ -99,58 +99,9 @@ window.ShareSphereAuth = {
       return { success: true, user: existingUser };
     }
 
-    // Provision admin account if logging in with an admin identifier
-    if (normalizedEmail.includes('admin')) {
-      const adminUser = {
-        id: 'usr_admin_' + Date.now(),
-        name: 'Administrator',
-        email: normalizedEmail,
-        password: password,
-        role: 'admin',
-        status: 'Active',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
-        location: 'Bangalore, India',
-        points: 1000,
-        rating: 5.0,
-        donationsCount: 5,
-        requestsCount: 2,
-        completedCount: 5,
-        peopleHelped: 5,
-        badges: ['Platform Admin', 'Eco Anchor'],
-        createdAt: new Date().toISOString()
-      };
-      if (window.ShareSphereDB) {
-        await window.ShareSphereDB.insert('users', adminUser);
-      }
-      this.setCurrentUser(adminUser);
-      return { success: true, user: adminUser };
+    if (!existingUser) {
+      return { success: false, error: 'No account found with this email. Please check your spelling or register a new account.' };
     }
-
-    // Seamlessly provision local user account on first sign-in
-    const displayName = email.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Community Member';
-    const newUser = {
-      id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-      name: displayName,
-      email: normalizedEmail,
-      password: password,
-      role: 'user',
-      status: 'Active',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-      location: 'Bangalore, India',
-      points: 150,
-      rating: 5.0,
-      donationsCount: 0,
-      requestsCount: 0,
-      completedCount: 0,
-      peopleHelped: 0,
-      badges: ['Eco Starter'],
-      createdAt: new Date().toISOString()
-    };
-    if (window.ShareSphereDB) {
-      await window.ShareSphereDB.insert('users', newUser);
-    }
-    this.setCurrentUser(newUser);
-    return { success: true, user: newUser, isNew: true };
   },
 
   /**
@@ -172,7 +123,7 @@ window.ShareSphereAuth = {
           status: 'Active',
           avatar: userCredential.user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
           location: location || 'Bangalore, India',
-          points: 150,
+          points: 0,
           rating: 5.0,
           donationsCount: 0,
           requestsCount: 0,
@@ -214,7 +165,7 @@ window.ShareSphereAuth = {
       status: 'Active',
       avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
       location: location || 'Bangalore, India',
-      points: 150,
+      points: 0,
       rating: 5.0,
       donationsCount: 0,
       requestsCount: 0,
@@ -280,27 +231,21 @@ window.ShareSphereAuth = {
             <span class="badge-counter" id="nav-notif-count" style="display: none;">0</span>
           </a>
 
-          <!-- Saved / Wishlist -->
-          <a href="wishlist.html" class="nav-icon-btn text-decoration-none" title="Saved Resources">
-            <i class="bi bi-heart"></i>
-            <span class="badge-counter" id="nav-wishlist-count" style="display: none;">0</span>
-          </a>
-
           <!-- User Menu Dropdown -->
           <div class="dropdown">
-            <button class="btn p-0 border-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn p-0 border-0 d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="User Menu">
               <img src="${user.avatar}" alt="${user.name}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);">
             </button>
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
               <li class="px-3 py-2 border-bottom mb-2">
                 <div class="fw-bold text-dark">${user.name}</div>
                 <div class="small text-muted text-truncate">${user.email}</div>
-                <div class="badge bg-success-subtle text-success mt-1">🌱 ${user.points || 500} Impact Points</div>
+                <div class="badge bg-success-subtle text-success mt-1">🌱 ${user.points || 0} Impact Points</div>
               </li>
               <li><a class="dropdown-item dropdown-item-custom" href="profile.html"><i class="bi bi-person-circle text-primary"></i> My Profile</a></li>
               <li><a class="dropdown-item dropdown-item-custom" href="donations.html"><i class="bi bi-box2-heart text-success"></i> My Donations</a></li>
               <li><a class="dropdown-item dropdown-item-custom" href="requests.html"><i class="bi bi-arrow-left-right text-info"></i> My Requests</a></li>
-              <li><a class="dropdown-item dropdown-item-custom" href="wishlist.html"><i class="bi bi-heart text-danger"></i> Saved Resources</a></li>
+              <li><a class="dropdown-item dropdown-item-custom" href="wishlist.html"><i class="bi bi-heart text-danger"></i> Wishlist</a></li>
               <li><a class="dropdown-item dropdown-item-custom" href="impact.html"><i class="bi bi-globe-americas text-emerald"></i> Environmental Impact</a></li>
               ${user.role === 'admin' ? `<li><hr class="dropdown-divider"></li><li><a class="dropdown-item dropdown-item-custom text-primary fw-bold" href="admin.html"><i class="bi bi-shield-lock-fill"></i> Admin Console</a></li>` : ''}
               <li><hr class="dropdown-divider"></li>
@@ -312,11 +257,6 @@ window.ShareSphereAuth = {
     } else {
       container.innerHTML = `
         <div class="d-flex align-items-center gap-2">
-          <!-- Saved / Wishlist for Guests -->
-          <a href="wishlist.html" class="nav-icon-btn text-decoration-none me-1" title="Saved Resources">
-            <i class="bi bi-heart"></i>
-            <span class="badge-counter" id="nav-wishlist-count" style="display: none;">0</span>
-          </a>
           <a href="login.html" class="btn btn-secondary-custom">Log In</a>
           <a href="register.html" class="btn btn-primary-custom">Join Community</a>
         </div>

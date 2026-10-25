@@ -25,7 +25,7 @@ function renderUserProfile() {
   document.getElementById('profile-name').textContent = user.name || 'Community Member';
   document.getElementById('profile-email').textContent = user.email || 'user@sharesphere.org';
   document.getElementById('profile-location').innerHTML = `<i class="bi bi-geo-alt-fill text-danger"></i> ${user.location || 'Bangalore, India'}`;
-  document.getElementById('profile-points').textContent = (user.points || 50).toLocaleString();
+  document.getElementById('profile-points').textContent = ((user.points !== undefined && user.points !== null) ? user.points : 0).toLocaleString();
   document.getElementById('profile-rating').textContent = (user.rating || 5.0).toFixed(1);
 
   // Bio and Contact Information
@@ -85,7 +85,7 @@ function renderUserBadges(user, donationsCount, completedShares) {
       icon: '🤝',
       name: 'Community Helper',
       desc: 'Participated in 3 or more resource exchanges.',
-      unlocked: completedShares >= 1 || (user.points || 0) >= 100
+      unlocked: completedShares >= 3
     },
     {
       id: 'waste_reducer',
@@ -238,12 +238,14 @@ window.saveProfileChanges = async () => {
  */
 function renderImpactDashboard() {
   const allDonations = window.ShareSphereDB.getCollection('donations');
-  const totalImpact = window.ShareSphereUtils.calculateEnvironmentalImpact(allDonations);
+  const totalImpact = (window.ShareSphereUtils && window.ShareSphereUtils.getPlatformImpactMetrics)
+    ? window.ShareSphereUtils.getPlatformImpactMetrics(allDonations)
+    : window.ShareSphereUtils.calculateEnvironmentalImpact(allDonations);
 
-  document.getElementById('impact-items-reused').textContent = totalImpact.itemsReused;
-  document.getElementById('impact-waste-prevented').textContent = totalImpact.estimatedWasteKg + ' kg';
-  document.getElementById('impact-co2-avoided').textContent = totalImpact.estimatedCO2eKg + ' kg';
-  document.getElementById('impact-people-helped').textContent = totalImpact.peopleHelped;
+  document.getElementById('impact-items-reused').textContent = totalImpact.itemsReused.toLocaleString() + '+';
+  document.getElementById('impact-waste-prevented').textContent = totalImpact.estimatedWasteKg.toLocaleString() + ' kg';
+  document.getElementById('impact-co2-avoided').textContent = totalImpact.estimatedCO2eKg.toLocaleString() + ' kg';
+  document.getElementById('impact-people-helped').textContent = totalImpact.peopleHelped.toLocaleString() + '+';
 
   const categories = ['Food', 'Clothes', 'Books', 'Electronics', 'Furniture', 'Toys', 'Other'];
   const breakdownContainer = document.getElementById('impact-breakdown-list');

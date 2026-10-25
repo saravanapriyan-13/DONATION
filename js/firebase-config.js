@@ -211,6 +211,82 @@ const DEFAULT_SEED_DONATIONS = [
   }
 ];
 
+// Seed Users for local and demo authentication
+const DEFAULT_SEED_USERS = [
+  {
+    id: 'usr_admin_default',
+    name: 'Administrator',
+    email: 'admin@sharesphere.org',
+    password: 'password123',
+    role: 'admin',
+    status: 'Active',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&q=80',
+    location: 'Bangalore, India',
+    points: 1000,
+    rating: 5.0,
+    donationsCount: 5,
+    requestsCount: 2,
+    completedCount: 5,
+    peopleHelped: 5,
+    badges: ['Platform Admin', 'Eco Anchor', 'Community Champion'],
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'usr_donor_priya',
+    name: 'Priya Sharma',
+    email: 'priya@example.com',
+    password: 'password123',
+    role: 'user',
+    status: 'Active',
+    avatar: 'https://i.pravatar.cc/150?img=47',
+    location: 'Koramangala, Bangalore',
+    points: 250,
+    rating: 4.9,
+    donationsCount: 3,
+    requestsCount: 1,
+    completedCount: 3,
+    peopleHelped: 4,
+    badges: ['Eco Starter', 'Community Helper'],
+    createdAt: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: 'usr_donor_rahul',
+    name: 'Rahul Verma',
+    email: 'rahul@example.com',
+    password: 'password123',
+    role: 'user',
+    status: 'Active',
+    avatar: 'https://i.pravatar.cc/150?img=12',
+    location: 'MG Road, Bangalore',
+    points: 120,
+    rating: 4.8,
+    donationsCount: 2,
+    requestsCount: 0,
+    completedCount: 2,
+    peopleHelped: 2,
+    badges: ['Eco Starter'],
+    createdAt: new Date(Date.now() - 172800000).toISOString()
+  },
+  {
+    id: 'usr_donor_anita',
+    name: 'Anita Desai',
+    email: 'anita@example.com',
+    password: 'password123',
+    role: 'user',
+    status: 'Active',
+    avatar: 'https://i.pravatar.cc/150?img=32',
+    location: 'Indiranagar, Bangalore',
+    points: 400,
+    rating: 5.0,
+    donationsCount: 4,
+    requestsCount: 2,
+    completedCount: 4,
+    peopleHelped: 6,
+    badges: ['Eco Starter', 'Community Helper', 'Waste Reducer'],
+    createdAt: new Date(Date.now() - 259200000).toISOString()
+  }
+];
+
 /**
  * Unified Repository with Live Server Database, Cloud Firestore, and Cross-Account Bus
  */
@@ -243,7 +319,7 @@ class ShareSphereStore {
       }
     });
 
-    // Seed initial donations if empty
+    // Seed initial donations & users if empty
     this.initDefaultSeedData();
 
     // Initial fetch from Server API
@@ -269,6 +345,10 @@ class ShareSphereStore {
     const existing = this.getCollection('donations');
     if (!existing || existing.length === 0) {
       this.setCollection('donations', DEFAULT_SEED_DONATIONS, true);
+    }
+    const existingUsers = this.getCollection('users');
+    if (!existingUsers || existingUsers.length === 0) {
+      this.setCollection('users', DEFAULT_SEED_USERS, true);
     }
   }
 

@@ -2,6 +2,14 @@
   "version": 2,
   "routes": [
     {
+      "src": "^/signup(\\.html)?$",
+      "dest": "/register.html"
+    },
+    {
+      "src": "^/saved(\\.html)?$",
+      "dest": "/wishlist.html"
+    },
+    {
       "src": "^/api/data/(?<collection>[^/]+)/(?<id>[^/]+)$",
       "dest": "/api/data?collection=$collection&id=$id"
     },

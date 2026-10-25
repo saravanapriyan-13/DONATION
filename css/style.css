@@ -234,6 +234,51 @@ a {
   border: 2px solid #fff;
 }
 
+/* Navbar Right Edge Spacing & Auth Section Rules */
+.sharesphere-navbar .container {
+  padding-left: clamp(1rem, 2.5vw, 1.75rem);
+  padding-right: clamp(1rem, 2.5vw, 1.75rem);
+  max-width: 1320px;
+}
+
+#navbar-auth-section {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-right: 0.35rem;
+}
+
+#navbar-auth-section .dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+#navbar-auth-section .dropdown > button {
+  padding: 2px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#navbar-auth-section .dropdown > button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+
+#navbar-auth-section .dropdown-menu-custom {
+  right: 0 !important;
+  left: auto !important;
+  max-width: calc(100vw - 2rem);
+}
+
+/* Page Header Offset to Prevent Sticky Navbar Overlapping */
+#donate-wizard-container,
+.page-header-offset {
+  padding-top: 3.25rem !important;
+  margin-top: 0.5rem;
+}
+
 /* Custom Dropdown Menus */
 .dropdown-menu-custom {
   border: 1px solid var(--border);

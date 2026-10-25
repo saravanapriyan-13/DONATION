@@ -27,22 +27,24 @@ function initHeroCounters() {
       if (entry.isIntersecting) {
         const el = entry.target;
         const target = parseInt(el.getAttribute('data-target')) || 0;
-        const duration = 2000;
-        const stepTime = 20;
-        const steps = duration / stepTime;
-        const increment = target / steps;
-        let current = 0;
+        const duration = 1500;
+        let startTimestamp = null;
 
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            el.textContent = target.toLocaleString() + '+';
-            clearInterval(timer);
+        function step(timestamp) {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          // Smooth ease-out cubic curve
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          const current = Math.floor(easeOut * target);
+          el.textContent = current.toLocaleString() + (progress >= 1 ? '+' : '');
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
           } else {
-            el.textContent = Math.floor(current).toLocaleString();
+            el.textContent = target.toLocaleString() + '+';
           }
-        }, stepTime);
+        }
 
+        window.requestAnimationFrame(step);
         obs.unobserve(el);
       }
     });
