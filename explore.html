@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Explore Free Items - ShareSphere Community Marketplace</title>
   <meta name="description" content="Browse free donations from your community. Books, clothes, food, electronics and more. Free to claim.">
+  <!-- Google Fonts & Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -12,67 +17,95 @@
   <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/responsive.css">
   <style>
-    body{background:#f1f3f6}
-    .explore-topbar{background:var(--grad-primary);padding:.7rem 0;position:sticky;top:62px;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-    .explore-search-wrap{display:flex;align-items:center;background:#fff;border-radius:2px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.12)}
-    .explore-search-wrap input{flex:1;border:none;padding:.6rem 1rem;font-size:.95rem;outline:none;font-family:var(--font-main)}
-    .explore-search-wrap button{background:#f9a825;border:none;padding:.6rem 1.2rem;font-size:1.1rem;cursor:pointer;color:#333}
-    .explore-banner{background:linear-gradient(120deg,#0a2540 0%,#1a4880 40%,#0e6655 100%);color:#fff;padding:1.2rem 1.5rem;border-radius:6px;margin-bottom:1rem;position:relative;overflow:hidden;min-height:110px;display:flex;align-items:center;justify-content:space-between}
-    .explore-banner::before{content:'';position:absolute;right:-60px;top:-40px;width:220px;height:220px;background:rgba(255,255,255,.07);border-radius:50%}
-    .explore-banner h2{font-size:1.35rem;margin:0 0 .25rem;font-weight:800}
-    .explore-banner p{font-size:.82rem;margin:0;opacity:.85}
-    .donate-cta{background:#f9a825;color:#0a2540;font-weight:800;font-size:.82rem;padding:.55rem 1.25rem;border-radius:4px;text-decoration:none;white-space:nowrap;display:inline-block;transition:transform .2s}
-    .donate-cta:hover{transform:scale(1.04);background:#ffb300}
-    .category-pills-row{background:#fff;border-radius:6px;padding:.85rem 1rem;margin-bottom:1rem;display:flex;gap:.5rem;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-    .cat-pill{display:flex;flex-direction:column;align-items:center;gap:3px;background:#f8f9fa;border:2px solid transparent;border-radius:8px;padding:.6rem .9rem;cursor:pointer;font-size:.7rem;font-weight:700;color:#333;transition:all .2s;min-width:68px;text-align:center}
-    .cat-pill .pill-icon{font-size:1.5rem;line-height:1}
-    .cat-pill:hover,.cat-pill.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark)}
-    .sort-filter-bar{background:#fff;border-radius:6px;padding:.6rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;font-size:.82rem;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-    .sort-filter-bar label{color:#555;font-weight:600;white-space:nowrap}
-    .sort-filter-bar select{border:1px solid #ddd;border-radius:4px;padding:.3rem .6rem;font-size:.82rem;background:#fafafa;cursor:pointer}
-    .sort-filter-bar .divider{color:#ddd}
-    .count-badge-bar{margin-left:auto;font-weight:700;color:#333}
-    .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem;background:transparent;border-radius:8px}
-    .product-card{background:#fff;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease;position:relative;display:flex;flex-direction:column;border-radius:10px;border:1px solid #e2e8f0;overflow:hidden}
-    .product-card:hover{z-index:2;transform:translateY(-3px);box-shadow:0 12px 28px rgba(15,23,42,.12)}
-    .product-card-img-wrap{position:relative;overflow:hidden;background:#f8f9fa;aspect-ratio:1/1}
-    .product-card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
-    .product-card:hover .product-card-img-wrap img{transform:scale(1.07)}
-    .product-card-body{padding:.75rem .85rem .9rem;flex:1;display:flex;flex-direction:column}
-    .product-card-title{font-size:.88rem;font-weight:600;color:#212121;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .product-card-meta{font-size:.74rem;color:#878787;margin-bottom:6px}
-    .product-card-location{font-size:.75rem;color:#555}
+    body{background:#F8FAFC}
+    .explore-topbar{background:rgba(255,255,255,0.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding:.85rem 0;position:sticky;top:62px;z-index:100;border-bottom:1px solid #E4E4E7;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+    .explore-search-wrap{display:flex;align-items:center;background:#fff;border-radius:9999px;border:1.5px solid #E4E4E7;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.04);transition:all .2s ease}
+    .explore-search-wrap:focus-within{border-color:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+    .explore-search-wrap input{flex:1;border:none;padding:.65rem 1.15rem;font-size:.95rem;outline:none;font-family:var(--font-main)}
+    .explore-search-wrap button{background:linear-gradient(135deg,#059669,#0D9488);border:none;padding:.65rem 1.4rem;font-size:1.05rem;cursor:pointer;color:#fff;transition:opacity .2s ease}
+    .explore-search-wrap button:hover{opacity:.9}
+    .explore-banner{background:linear-gradient(135deg,#09090B 0%,#18181B 55%,#064E3B 100%);color:#fff;padding:1.6rem 2rem;border-radius:1rem;margin-bottom:1.25rem;position:relative;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(16,185,129,.2);box-shadow:0 12px 30px -5px rgba(0,0,0,.15)}
+    .explore-banner::before{content:'';position:absolute;right:-40px;top:-40px;width:240px;height:240px;background:radial-gradient(circle,rgba(16,185,129,.25) 0%,transparent 70%);border-radius:50%}
+    .explore-banner h2{font-size:1.45rem;margin:0 0 .35rem;font-weight:800;letter-spacing:-.025em}
+    .explore-banner p{font-size:.875rem;margin:0;opacity:.85}
+    .donate-cta{background:linear-gradient(135deg,#059669,#0D9488,#06B6D4);color:#fff;font-weight:700;font-size:.85rem;padding:.65rem 1.35rem;border-radius:9999px;text-decoration:none;white-space:nowrap;display:inline-block;transition:all .2s;box-shadow:0 4px 14px rgba(16,185,129,.35)}
+    .donate-cta:hover{transform:translateY(-2px);color:#fff;box-shadow:0 6px 20px rgba(16,185,129,.45)}
+    .category-pills-row{background:#fff;border-radius:1rem;padding:.85rem 1.15rem;margin-bottom:1.25rem;display:flex;gap:.65rem;flex-wrap:wrap;border:1px solid #E4E4E7;box-shadow:0 4px 14px rgba(0,0,0,.03)}
+    .cat-pill{display:flex;flex-direction:column;align-items:center;gap:4px;background:#F8FAFC;border:1.5px solid #E4E4E7;border-radius:.85rem;padding:.65rem 1rem;cursor:pointer;font-size:.72rem;font-weight:700;color:#09090B;transition:all .2s cubic-bezier(.16,1,.3,1);min-width:72px;text-align:center}
+    .cat-pill .pill-icon{font-size:1.4rem;line-height:1}
+    .cat-pill:hover{transform:translateY(-2px);border-color:#10B981;background:#ECFDF5;color:#047857}
+    .cat-pill.active{border-color:#10B981;background:linear-gradient(180deg,#ECFDF5,#FFFFFF);color:#047857;box-shadow:0 0 0 2px rgba(16,185,129,.25)}
+    .sort-filter-bar{background:#fff;border-radius:1rem;padding:.75rem 1.15rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;font-size:.85rem;border:1px solid #E4E4E7;box-shadow:0 4px 14px rgba(0,0,0,.03)}
+    .sort-filter-bar label{color:#52525B;font-weight:600;white-space:nowrap}
+    .sort-filter-bar select{border:1px solid #E4E4E7;border-radius:.5rem;padding:.35rem .75rem;font-size:.85rem;background:#F8FAFC;cursor:pointer;outline:none}
+    .sort-filter-bar select:focus{border-color:#10B981}
+    .sort-filter-bar .divider{color:#E4E4E7}
+    .count-badge-bar{margin-left:auto;font-weight:700;color:#09090B}
+    .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.35rem;background:transparent}
+    .product-card{background:#fff;cursor:pointer;transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s cubic-bezier(.16,1,.3,1),border-color .3s ease;position:relative;display:flex;flex-direction:column;border-radius:1rem;border:1px solid #E4E4E7;overflow:hidden;box-shadow:0 8px 20px -4px rgba(15,23,42,.05)}
+    .product-card:hover{transform:translateY(-4px);box-shadow:0 22px 40px -10px rgba(16,185,129,.14),0 8px 16px -4px rgba(0,0,0,.04);border-color:rgba(16,185,129,.4)}
+    .product-card-img-wrap{position:relative;overflow:hidden;background:#F8FAFC;aspect-ratio:1/1}
+    .product-card-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s cubic-bezier(.16,1,.3,1)}
+    .product-card:hover .product-card-img-wrap img{transform:scale(1.06)}
+    .product-card-body{padding:.9rem 1rem 1rem;flex:1;display:flex;flex-direction:column}
+    .product-card-title{font-size:.95rem;font-weight:700;color:#09090B;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-.015em}
+    .product-card-meta{font-size:.78rem;color:#71717A;margin-bottom:6px}
+    .product-card-location{font-size:.78rem;color:#52525B}
     .product-card-location i{color:var(--primary)}
-    .product-card-badge-free{position:absolute;top:8px;left:8px;background:var(--primary);color:white;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.5px}
-    .product-card-cat-icon{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:.95rem;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-    .product-wishlist-btn{position:absolute;bottom:8px;right:8px;background:#ffffff;border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;transition:transform .2s,box-shadow .2s,color .2s;box-shadow:0 2px 8px rgba(0,0,0,.18);color:#888;z-index:3}
-    .product-wishlist-btn:hover{transform:scale(1.1);color:#e53935;box-shadow:0 3px 12px rgba(229,57,53,.25)}
-    .product-wishlist-btn.active{color:#e53935}
-    .product-card-donor{display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:8px;border-top:1px solid #f5f5f5}
-    .product-card-donor img{width:22px;height:22px;border-radius:50%;object-fit:cover}
-    .product-card-donor-name{font-size:.72rem;color:#666;font-weight:600}
-    .product-card-btn{display:block;background:#ff6161;color:white;text-align:center;font-size:.78rem;font-weight:700;padding:.45rem;text-decoration:none;transition:background .2s;letter-spacing:.3px}
-    .product-card-btn:hover{background:#e53935;color:white}
-    .product-card-btn.primary-btn{background:var(--primary)}
-    .product-card-btn.primary-btn:hover{background:var(--primary-dark)}
-    .status-chip{display:inline-block;font-size:.63rem;font-weight:800;padding:1px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px}
-    .status-chip.available{background:#e8f5e9;color:#2e7d32}
-    .cond-badge{font-size:.68rem;padding:2px 6px;border-radius:3px;background:#e3f2fd;color:#0277bd;font-weight:600}
-    .explore-empty{background:#fff;border-radius:6px;padding:4rem 2rem;text-align:center}
+    .product-card-badge-free{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,#059669,#0D9488);color:white;font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:9999px;text-transform:uppercase;letter-spacing:.5px;box-shadow:0 2px 6px rgba(5,150,105,.35)}
+    .product-card-cat-icon{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .product-wishlist-btn{position:absolute;bottom:10px;right:10px;background:#ffffff;border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer;transition:transform .2s,box-shadow .2s,color .2s;box-shadow:0 2px 10px rgba(0,0,0,.12);color:#71717A;z-index:3}
+    .product-wishlist-btn:hover{transform:scale(1.12);color:#f43f5e;box-shadow:0 4px 14px rgba(244,63,94,.28)}
+    .product-wishlist-btn.active{color:#f43f5e}
+    .product-card-donor{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:10px;border-top:1px solid #F4F4F5}
+    .product-card-donor img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid #E4E4E7}
+    .product-card-donor-name{font-size:.75rem;color:#52525B;font-weight:600}
+    .product-card-btn{display:block;background:linear-gradient(135deg,#059669,#0D9488);color:white;text-align:center;font-size:.825rem;font-weight:700;padding:.55rem;text-decoration:none;border-radius:.5rem;margin-top:.75rem;transition:opacity .2s;letter-spacing:-.01em}
+    .product-card-btn:hover{opacity:.92;color:white}
+    .product-card-btn.primary-btn{background:linear-gradient(135deg,#059669,#0D9488)}
+    .status-chip{display:inline-block;font-size:.65rem;font-weight:800;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.4px}
+    .status-chip.available{background:#ECFDF5;color:#047857;border:1px solid rgba(16,185,129,.2)}
+    .cond-badge{font-size:.7rem;padding:2px 8px;border-radius:9999px;background:#F1F5F9;color:#0284C7;font-weight:600}
+    .explore-empty{background:#fff;border-radius:1rem;padding:4rem 2rem;text-align:center;border:1px solid #E4E4E7}
     .explore-empty-icon{font-size:4rem;margin-bottom:1rem;display:block}
-    #exploreMap{height:420px;border-radius:8px}
-    .section-title-amazon{font-size:1.1rem;font-weight:800;color:#212121;border-left:4px solid var(--primary);padding-left:10px;margin:.5rem 0 1rem}
-    .quick-filter-chip{display:inline-flex;align-items:center;gap:4px;font-size:.76rem;font-weight:600;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);cursor:pointer;transition:all .15s;color:#fff;text-decoration:none}
-    @media(max-width:991.98px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.explore-banner h2{font-size:1.15rem}}
-    @media(max-width:575.98px){.product-grid{grid-template-columns:1fr;gap:1rem}.explore-banner h2{font-size:1rem}.explore-topbar{top:56px}}
+    #exploreMap{height:420px;border-radius:1rem}
+    .section-title-amazon{font-size:1.15rem;font-weight:800;color:#09090B;border-left:4px solid var(--primary);padding-left:12px;margin:.75rem 0 1.25rem;letter-spacing:-.02em}
+    .quick-filter-chip{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;padding:5px 12px;border-radius:9999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);cursor:pointer;transition:all .15s;color:#fff;text-decoration:none}
+    .quick-filter-chip:hover,.quick-filter-chip.active{background:rgba(255,255,255,.25);border-color:#fff}
+    @media(max-width:991.98px){.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.explore-banner h2{font-size:1.25rem}}
+    @media(max-width:575.98px){.product-grid{grid-template-columns:1fr;gap:1rem}.explore-banner h2{font-size:1.1rem}.explore-topbar{top:56px}}
   </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg sharesphere-navbar">
     <div class="container">
-      <a class="navbar-brand" href="index.html">
-        <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
-        <span class="brand-name">ShareSphere</span>
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <div class="brand-logo-wrap">
+          <svg class="sharesphere-logo-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="38" height="38">
+            <defs>
+              <linearGradient id="ss-grad-primary" x1="2" y1="2" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#34D399"/>
+                <stop offset="50%" stop-color="#14B8A6"/>
+                <stop offset="100%" stop-color="#06B6D4"/>
+              </linearGradient>
+              <linearGradient id="ss-grad-accent" x1="42" y1="2" x2="2" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#6EE7B7"/>
+                <stop offset="50%" stop-color="#2DD4BF"/>
+                <stop offset="100%" stop-color="#0EA5E9"/>
+              </linearGradient>
+              <filter id="ss-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2.5" stdDeviation="3" flood-color="#10B981" flood-opacity="0.38"/>
+              </filter>
+            </defs>
+            <ellipse cx="22" cy="22" rx="16" ry="7.5" transform="rotate(-30 22 22)" stroke="url(#ss-grad-primary)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="32 10" filter="url(#ss-glow)"/>
+            <ellipse cx="22" cy="22" rx="16" ry="7.5" transform="rotate(30 22 22)" stroke="url(#ss-grad-accent)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="32 10" filter="url(#ss-glow)"/>
+            <circle cx="8.5" cy="14" r="3.2" fill="url(#ss-grad-primary)" filter="url(#ss-glow)"/>
+            <circle cx="35.5" cy="30" r="3.2" fill="url(#ss-grad-accent)" filter="url(#ss-glow)"/>
+            <circle cx="22" cy="22" r="7.5" fill="url(#ss-grad-primary)" filter="url(#ss-glow)"/>
+            <circle cx="19.5" cy="19.5" r="2.5" fill="#FFFFFF" fill-opacity="0.75"/>
+          </svg>
+        </div>
+        <span class="brand-name tracking-tight font-bold text-zinc-900 dark:text-white">ShareSphere</span>
         <span class="brand-tag">Free Sharing</span>
       </a>
       <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
@@ -188,8 +221,17 @@
       <div class="row g-4 mb-4">
         <div class="col-lg-4">
           <div class="d-flex align-items-center gap-2 mb-3">
-            <div class="brand-icon"><i class="bi bi-arrow-repeat"></i></div>
-            <span class="fs-4 fw-bold text-white font-display">ShareSphere</span>
+            <div class="brand-logo-wrap">
+              <svg class="sharesphere-logo-svg" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" width="34" height="34">
+                <ellipse cx="22" cy="22" rx="16" ry="7.5" transform="rotate(-30 22 22)" stroke="url(#ss-grad-primary)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="32 10"/>
+                <ellipse cx="22" cy="22" rx="16" ry="7.5" transform="rotate(30 22 22)" stroke="url(#ss-grad-accent)" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="32 10"/>
+                <circle cx="8.5" cy="14" r="3.2" fill="url(#ss-grad-primary)"/>
+                <circle cx="35.5" cy="30" r="3.2" fill="url(#ss-grad-accent)"/>
+                <circle cx="22" cy="22" r="7.5" fill="url(#ss-grad-primary)"/>
+                <circle cx="19.5" cy="19.5" r="2.5" fill="#FFFFFF" fill-opacity="0.75"/>
+              </svg>
+            </div>
+            <span class="fs-4 fw-bold text-white font-display tracking-tight">ShareSphere</span>
           </div>
           <p class="small mb-3">
             A free community resource-sharing platform. We believe what one person no longer needs can become another person's essential treasure.
