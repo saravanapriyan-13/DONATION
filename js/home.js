@@ -108,7 +108,7 @@ function renderHomeNearbyDonations() {
         <div class="empty-state-box">
           <span class="empty-state-icon">📦</span>
           <h4 class="empty-state-title">No resources nearby yet</h4>
-          <p class="empty-state-text">Be the first to share an unused resource in your neighborhood!</p>
+          <p class="empty-state-text text-zinc-300">Be the first to share an unused resource in your neighborhood!</p>
           <a href="donate.html" class="btn btn-primary-custom">
             <i class="bi bi-plus-circle"></i> Donate an Item
           </a>

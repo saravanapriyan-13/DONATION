@@ -14,9 +14,13 @@ window.ShareSphereAuth = {
 
     try {
       const user = JSON.parse(raw);
+      if (!user) return null;
+      if (!user.uid) user.uid = user.id;
+      if (!user.id) user.id = user.uid;
+
       const auth = typeof fbAuth !== 'undefined' ? fbAuth : null;
       if (auth && auth.currentUser) {
-        return user.id === auth.currentUser.uid ? user : null;
+        return (user.id === auth.currentUser.uid || user.uid === auth.currentUser.uid) ? user : null;
       }
       // Return cached local session when Firebase is not configured or in local mode
       return user;
@@ -27,6 +31,8 @@ window.ShareSphereAuth = {
 
   setCurrentUser(user) {
     if (user) {
+      if (!user.uid) user.uid = user.id;
+      if (!user.id) user.id = user.uid;
       localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(user));
     } else {
       localStorage.removeItem(this.CURRENT_USER_KEY);

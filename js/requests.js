@@ -6,8 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('my-requests-list')) {
     renderMyRequests();
 
+    // Pull fresh requests from cloud database immediately
+    if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+      window.ShareSphereDB.syncAllFromAPI().then(() => {
+        renderMyRequests();
+      }).catch(() => {});
+    }
+
+    // Periodic live sync for request status updates from donor
+    setInterval(() => {
+      if (window.ShareSphereDB && typeof window.ShareSphereDB.syncCollectionFromAPI === 'function') {
+        window.ShareSphereDB.syncCollectionFromAPI('requests').then(() => {
+          renderMyRequests();
+        }).catch(() => {});
+      }
+    }, 4000);
+
     window.addEventListener('sharesphere_data_changed', (e) => {
-      if (!e.detail || e.detail.collection === 'requests') {
+      if (!e.detail || e.detail.collection === 'requests' || e.detail.collection === 'donations') {
         renderMyRequests();
       }
     });
@@ -28,7 +44,8 @@ function submitResourceRequest(donationId) {
   }
 
   // Prevent requesting your own donation
-  if (donation.donorId === user.id) {
+  const currentUid = String(user.uid || user.id);
+  if (donation.donorId && String(donation.donorId) === currentUid) {
     window.ShareSphereUtils.showToast('You cannot request your own donation.', 'warning');
     return;
   }
@@ -49,16 +66,16 @@ function submitResourceRequest(donationId) {
     donorId: donation.donorId,
     donorName: donation.donorName,
     donorAvatar: donation.donorAvatar,
-    requesterId: user.id,
-    requesterName: user.name,
-    requesterAvatar: user.avatar,
+    requesterId: user.uid || user.id,
+    requesterName: user.name || user.displayName || 'Community Member',
+    requesterAvatar: user.avatar || user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
     quantity: qty,
     message: msg,
     preferredTime: time,
     status: 'Requested',
     pickupDate: null,
     pickupTime: null,
-    pickupLocation: donation.location
+    pickupLocation: donation.location || 'Community Area'
   };
 
   window.ShareSphereDB.insert('requests', newRequest);
@@ -78,6 +95,11 @@ function submitResourceRequest(donationId) {
     link: 'donations.html',
     isRead: false
   });
+
+  // Force push to server
+  if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+    window.ShareSphereDB.syncAllFromAPI().catch(() => {});
+  }
 
   // Celebration
   if (typeof confetti === 'function') {
@@ -107,7 +129,12 @@ function renderMyRequests() {
   const user = window.ShareSphereAuth.requireAuth();
   if (!user) return;
 
-  const requests = window.ShareSphereDB.getCollection('requests').filter(r => r.requesterId === user.id);
+  const currentUid = String(user.uid || user.id);
+  const requests = window.ShareSphereDB.getCollection('requests').filter(r => {
+    if (!r) return false;
+    const reqUid = String(r.requesterId || '');
+    return reqUid === currentUid || (user.id && reqUid === String(user.id)) || (user.uid && reqUid === String(user.uid));
+  });
 
   if (requests.length === 0) {
     container.innerHTML = `
@@ -115,7 +142,7 @@ function renderMyRequests() {
         <div class="empty-state-box">
           <span class="empty-state-icon">🤝</span>
           <h4 class="empty-state-title">No requests made yet</h4>
-          <p class="empty-state-text">Discover available resources in your community and request what you need.</p>
+          <p class="empty-state-text text-zinc-300">Discover available resources in your community and request what you need.</p>
           <a href="explore.html" class="btn btn-primary-custom">
             <i class="bi bi-compass"></i> Explore Resources
           </a>
@@ -129,15 +156,15 @@ function renderMyRequests() {
     const timelineHtml = generateTimelineHtml(req.status);
     return `
       <div class="col-12 mb-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="card border-0 shadow-xl rounded-4 p-4" style="background: rgba(18, 22, 36, 0.95); border: 1px solid rgba(255, 255, 255, 0.12) !important;">
           <div class="row align-items-center mb-3">
             <div class="col-md-7 d-flex align-items-center gap-3">
-              <img src="${req.donationImage}" class="rounded-3" style="width: 72px; height: 72px; object-fit: cover;">
+              <img src="${req.donationImage}" class="rounded-3 shadow-sm" style="width: 72px; height: 72px; object-fit: cover;">
               <div>
                 <span class="badge ${getStatusBadgeClass(req.status)} mb-1">${req.status}</span>
-                <h5 class="fw-bold mb-1 text-dark">${req.donationTitle}</h5>
-                <div class="small text-muted">
-                  Donor: <b>${req.donorName}</b> • Qty: <b>${req.quantity}</b> • Requested ${window.ShareSphereUtils.timeAgo(req.createdAt)}
+                <h5 class="fw-bold mb-1 text-white">${req.donationTitle}</h5>
+                <div class="small text-zinc-300">
+                  Donor: <b class="text-white">${req.donorName}</b> • Qty: <b class="text-white">${req.quantity}</b> • Requested <span class="text-zinc-400">${window.ShareSphereUtils.timeAgo(req.createdAt)}</span>
                 </div>
               </div>
             </div>
@@ -159,10 +186,10 @@ function renderMyRequests() {
           </div>
 
           <!-- Interactive Request Status Timeline -->
-          <div class="p-3 rounded-4 bg-light">
+          <div class="p-3 rounded-4" style="background: rgba(24, 28, 44, 0.85); border: 1px solid rgba(255, 255, 255, 0.08);">
             ${timelineHtml}
             ${req.pickupDate ? `
-              <div class="mt-3 p-2 px-3 bg-white rounded-3 border d-flex align-items-center justify-content-between small">
+              <div class="mt-3 p-2 px-3 rounded-3 border d-flex align-items-center justify-content-between small text-zinc-200" style="background: rgba(18, 20, 29, 0.85); border-color: rgba(255,255,255,0.1) !important;">
                 <div><i class="bi bi-geo-alt-fill text-danger"></i> <b>Pickup Location:</b> ${req.pickupLocation}</div>
                 <div><i class="bi bi-clock-fill text-primary"></i> <b>Time:</b> ${req.pickupDate} at ${req.pickupTime}</div>
               </div>

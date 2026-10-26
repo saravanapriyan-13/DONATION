@@ -39,7 +39,7 @@ function resolveBackendApiUrl() {
 
 window.SHARE_SPHERE_API_URL = resolveBackendApiUrl();
 
-// Firebase Configuration (Optional: Paste your Firebase/Firestore credentials here)
+// Firebase Configuration (Paste your Firebase credentials here, or set window.__FIREBASE_CONFIG__ or localStorage 'sharesphere_firebase_config')
 const firebaseConfig = {
   apiKey: "",
   authDomain: "",
@@ -50,6 +50,24 @@ const firebaseConfig = {
   appId: "",
   measurementId: ""
 };
+
+// Dynamically resolve Firebase config from environment / window / storage if available
+function getResolvedFirebaseConfig() {
+  if (typeof window.__FIREBASE_CONFIG__ === 'object' && window.__FIREBASE_CONFIG__ && window.__FIREBASE_CONFIG__.apiKey) {
+    return window.__FIREBASE_CONFIG__;
+  }
+  if (typeof window.firebaseConfig === 'object' && window.firebaseConfig && window.firebaseConfig.apiKey) {
+    return window.firebaseConfig;
+  }
+  try {
+    const raw = localStorage.getItem('sharesphere_firebase_config');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.apiKey || parsed.projectId)) return parsed;
+    }
+  } catch (_) {}
+  return firebaseConfig;
+}
 
 // Cloudinary Configuration (Optional: Direct unsigned client-side uploads)
 const cloudinaryConfig = {
@@ -142,11 +160,13 @@ let fbAuth = null;
 let fbFirestore = null;
 let fbDatabase = null;
 
+const activeFirebaseConfig = getResolvedFirebaseConfig();
+
 try {
-  const hasFirebaseConfig = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+  const hasFirebaseConfig = activeFirebaseConfig.apiKey && (activeFirebaseConfig.projectId || activeFirebaseConfig.authDomain);
   if (hasFirebaseConfig && typeof firebase !== 'undefined' && firebase.initializeApp) {
     if (!firebase.apps || !firebase.apps.length) {
-      fbApp = firebase.initializeApp(firebaseConfig);
+      fbApp = firebase.initializeApp(activeFirebaseConfig);
     } else {
       fbApp = firebase.app();
     }
@@ -159,7 +179,7 @@ try {
     }
     
     // Realtime Database setup (if databaseURL is present)
-    if (firebaseConfig.databaseURL && typeof firebase.database === 'function') {
+    if (activeFirebaseConfig.databaseURL && typeof firebase.database === 'function') {
       fbDatabase = firebase.database();
       console.log("🔥 Firebase Realtime Database Connected!");
     }
@@ -169,6 +189,12 @@ try {
 } catch (err) {
   console.warn("Firebase Live Init notice:", err.message);
 }
+
+// Expose instances globally
+window.fbApp = fbApp;
+window.fbAuth = fbAuth;
+window.fbFirestore = fbFirestore;
+window.fbDatabase = fbDatabase;
 
 // All dummy seed donations removed — pure real community listings
 const DEFAULT_SEED_DONATIONS = [];
@@ -350,9 +376,32 @@ class ShareSphereStore {
   }
 
   /**
-   * Sync collections from Server REST API (Spring Boot, Express, or Vercel serverless)
+   * Sync collections from Cloud Firestore or Server REST API (Spring Boot, Express, or Vercel serverless)
    */
   async syncCollectionFromAPI(collectionName) {
+    // 1. Try Cloud Firestore first if connected
+    if (fbFirestore) {
+      try {
+        const snapshot = await fbFirestore.collection(collectionName).get();
+        if (!snapshot.empty) {
+          const remoteItems = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data && data.id && !data.id.startsWith('don_seed_')) {
+              remoteItems.push(data);
+            }
+          });
+          remoteItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          this.setCollection(collectionName, remoteItems, false);
+          console.log(`🔥 Cloud Firestore synced ${remoteItems.length} [${collectionName}]`);
+          return;
+        }
+      } catch (fsErr) {
+        console.warn(`Firestore get notice for [${collectionName}]:`, fsErr.message);
+      }
+    }
+
+    // 2. Sync from Server API
     try {
       const baseUrl = window.SHARE_SPHERE_API_URL || '';
       const url = `${baseUrl}/api/data/${collectionName}`;
@@ -406,7 +455,8 @@ class ShareSphereStore {
         this.syncCollectionFromAPI('users'),
         this.syncCollectionFromAPI('requests'),
         this.syncCollectionFromAPI('notifications'),
-        this.syncCollectionFromAPI('reports')
+        this.syncCollectionFromAPI('reports'),
+        this.syncCollectionFromAPI('messages')
       ]);
     } finally {
       this.isSyncing = false;
@@ -419,7 +469,8 @@ class ShareSphereStore {
       this.syncCollectionFromAPI('donations');
       this.syncCollectionFromAPI('requests');
       this.syncCollectionFromAPI('notifications');
-    }, 3000);
+      this.syncCollectionFromAPI('messages');
+    }, 2500);
   }
 
   async insert(name, item) {
@@ -434,10 +485,7 @@ class ShareSphereStore {
     items.unshift(newItem);
     this.setCollection(name, items);
 
-    // 1. Save to Shared Backend Server (Express or Spring Boot)
-    await this.pushItemToServer(name, newItem);
-
-    // 2. Save to Cloud Firestore
+    // 1. Save to Cloud Firestore
     if (fbFirestore) {
       try {
         await fbFirestore.collection(name).doc(newItem.id).set(newItem);
@@ -447,7 +495,7 @@ class ShareSphereStore {
       }
     }
 
-    // 3. Save to Firebase Realtime Database if configured
+    // 2. Save to Firebase Realtime Database if configured
     if (fbDatabase) {
       try {
         await fbDatabase.ref(`${name}/${newItem.id}`).set(newItem);
@@ -456,6 +504,9 @@ class ShareSphereStore {
         console.warn(`Firebase RTDB write notice: ${e.message}`);
       }
     }
+
+    // 3. Save to Shared Backend Server (Express or Spring Boot)
+    await this.pushItemToServer(name, newItem);
 
     return newItem;
   }
@@ -467,7 +518,25 @@ class ShareSphereStore {
       items[index] = { ...items[index], ...updates, updatedAt: new Date().toISOString() };
       this.setCollection(name, items);
 
-      // 1. Save update to Shared Backend Server
+      // 1. Sync update to Cloud Firestore
+      if (fbFirestore) {
+        try {
+          await fbFirestore.collection(name).doc(id).set(updates, { merge: true });
+        } catch (e) {
+          console.warn(`Firestore update notice: ${e.message}`);
+        }
+      }
+
+      // 2. Sync update to Firebase RTDB
+      if (fbDatabase) {
+        try {
+          await fbDatabase.ref(`${name}/${id}`).update(updates);
+        } catch (e) {
+          console.warn(`Firebase RTDB update notice: ${e.message}`);
+        }
+      }
+
+      // 3. Save update to Shared Backend Server
       try {
         const baseUrl = window.SHARE_SPHERE_API_URL || '';
         await fetch(`${baseUrl}/api/data/${name}/${id}`, {
@@ -477,24 +546,6 @@ class ShareSphereStore {
         });
       } catch (err) {
         console.warn(`Server API update notice: ${err.message}`);
-      }
-
-      // 2. Sync update to Cloud Firestore
-      if (fbFirestore) {
-        try {
-          await fbFirestore.collection(name).doc(id).set(updates, { merge: true });
-        } catch (e) {
-          console.warn(`Firestore update notice: ${e.message}`);
-        }
-      }
-
-      // 3. Sync update to Firebase RTDB
-      if (fbDatabase) {
-        try {
-          await fbDatabase.ref(`${name}/${id}`).update(updates);
-        } catch (e) {
-          console.warn(`Firebase RTDB update notice: ${e.message}`);
-        }
       }
 
       return items[index];
@@ -507,17 +558,7 @@ class ShareSphereStore {
     const filtered = items.filter(item => item.id !== id);
     this.setCollection(name, filtered);
 
-    // 1. Remove from Shared Backend Server
-    try {
-      const baseUrl = window.SHARE_SPHERE_API_URL || '';
-      await fetch(`${baseUrl}/api/data/${name}/${id}`, {
-        method: 'DELETE'
-      });
-    } catch (err) {
-      console.warn(`Server API delete notice: ${err.message}`);
-    }
-
-    // 2. Remove from Cloud Firestore
+    // 1. Remove from Cloud Firestore
     if (fbFirestore) {
       try {
         await fbFirestore.collection(name).doc(id).delete();
@@ -526,13 +567,23 @@ class ShareSphereStore {
       }
     }
 
-    // 3. Remove from Firebase RTDB
+    // 2. Remove from Firebase RTDB
     if (fbDatabase) {
       try {
         await fbDatabase.ref(`${name}/${id}`).remove();
       } catch (e) {
         console.warn(`Firebase RTDB delete notice: ${e.message}`);
       }
+    }
+
+    // 3. Remove from Shared Backend Server
+    try {
+      const baseUrl = window.SHARE_SPHERE_API_URL || '';
+      await fetch(`${baseUrl}/api/data/${name}/${id}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      console.warn(`Server API delete notice: ${err.message}`);
     }
 
     return true;
@@ -543,7 +594,7 @@ class ShareSphereStore {
    */
   async syncFromCloudFirestore() {
     if (!fbFirestore) return;
-    const collections = ['donations', 'users', 'requests', 'notifications', 'reports'];
+    const collections = ['donations', 'users', 'requests', 'notifications', 'reports', 'messages'];
 
     for (const col of collections) {
       try {
@@ -555,10 +606,9 @@ class ShareSphereStore {
               remoteItems.push(data);
             }
           });
-          if (remoteItems.length > 0) {
-            console.log(`🔥 Firestore Snapshot: Received ${remoteItems.length} items for [${col}]`);
-            this.setCollection(col, remoteItems);
-          }
+          remoteItems.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+          console.log(`🔥 Firestore Live Snapshot: [${col}] updated with ${remoteItems.length} items`);
+          this.setCollection(col, remoteItems);
         }, (error) => {
           console.warn(`Firestore live snapshot notice for [${col}]:`, error.message);
         });
@@ -573,7 +623,7 @@ class ShareSphereStore {
    */
   async syncFromFirebaseRTDB() {
     if (!fbDatabase) return;
-    const collections = ['donations', 'users', 'requests', 'notifications', 'reports'];
+    const collections = ['donations', 'users', 'requests', 'notifications', 'reports', 'messages'];
     
     for (const col of collections) {
       try {
@@ -581,6 +631,7 @@ class ShareSphereStore {
           const val = snapshot.val();
           if (val) {
             const arr = Object.values(val).filter(item => item && item.id && !item.id.startsWith('don_seed_'));
+            arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
             this.setCollection(col, arr);
           }
         });

@@ -1,6 +1,28 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false
+    "donations": {
+      ".read": true,
+      ".write": true
+    },
+    "requests": {
+      ".read": true,
+      ".write": true
+    },
+    "users": {
+      ".read": true,
+      ".write": true
+    },
+    "notifications": {
+      ".read": true,
+      ".write": true
+    },
+    "reports": {
+      ".read": true,
+      ".write": true
+    },
+    "messages": {
+      ".read": true,
+      ".write": true
+    }
   }
 }

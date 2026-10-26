@@ -39,7 +39,7 @@ function renderWishlistItems() {
         <div class="empty-state-box">
           <span class="empty-state-icon">❤️</span>
           <h4 class="empty-state-title">Your saved list is empty</h4>
-          <p class="empty-state-text">Bookmark resources you find interesting while exploring the community.</p>
+          <p class="empty-state-text text-zinc-300">Bookmark resources you find interesting while exploring the community.</p>
           <a href="explore.html" class="btn btn-primary-custom">
             <i class="bi bi-compass"></i> Explore Resources
           </a>

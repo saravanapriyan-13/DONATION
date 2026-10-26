@@ -113,9 +113,9 @@
                 </button>
               </div>
 
-              <h3 class="fw-bold text-dark mb-2" id="detail-title">Loading...</h3>
-              <div class="small text-muted mb-3 d-flex align-items-center gap-2">
-                <i class="bi bi-geo-alt text-danger"></i> <span id="detail-location-text">Bangalore</span>
+              <h3 class="fw-bold text-white mb-2" id="detail-title">Loading...</h3>
+              <div class="small text-zinc-300 mb-3 d-flex align-items-center gap-2">
+                <i class="bi bi-geo-alt-fill text-danger"></i> <span id="detail-location-text">Bangalore</span>
                 <span>•</span>
                 <span id="detail-time-text">Recently added</span>
               </div>
@@ -127,18 +127,18 @@
                 <span class="meta-chip expiry py-1 px-2" id="detail-expiry" style="display: none;"><i class="bi bi-hourglass-split"></i> Exp: 2026-10-30</span>
               </div>
 
-              <h6 class="fw-bold text-dark mt-4 mb-2">Resource Description</h6>
-              <p class="text-muted small" style="line-height: 1.6;" id="detail-desc">
+              <h6 class="fw-bold text-white mt-4 mb-2">Resource Description</h6>
+              <p class="text-zinc-200 small" style="line-height: 1.6;" id="detail-desc">
                 Loading resource description...
               </p>
 
               <!-- Donor Profile Card -->
-              <div class="p-3 rounded-4 bg-light my-4 border">
+              <div class="p-3 rounded-4 my-4 border" style="background: rgba(24, 28, 44, 0.9); border-color: rgba(255,255,255,0.1) !important;">
                 <div class="d-flex align-items-center justify-content-between">
                   <div class="d-flex align-items-center gap-3">
-                    <img id="detail-donor-avatar" src="" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
+                    <img id="detail-donor-avatar" src="" class="rounded-circle shadow-sm" style="width: 48px; height: 48px; object-fit: cover;">
                     <div>
-                      <h6 class="fw-bold mb-0 text-dark" id="detail-donor-name">Donor Name</h6>
+                      <h6 class="fw-bold mb-0 text-white" id="detail-donor-name">Donor Name</h6>
                       <div class="small text-warning" id="detail-donor-rating">
                         <i class="bi bi-star-fill"></i> 4.9 (Community Trust Verified)
                       </div>
@@ -155,7 +155,7 @@
                 <i class="bi bi-hand-index-thumb-fill"></i> 🤝 Request Resource
               </button>
               <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted"><i class="bi bi-info-circle"></i> 100% Free • No commercial exchange</small>
+                <small class="text-zinc-300"><i class="bi bi-info-circle"></i> 100% Free • No commercial exchange</small>
                 <button class="btn btn-sm btn-link text-danger text-decoration-none" id="btn-open-report-modal">
                   <i class="bi bi-flag"></i> Report Resource
                 </button>
@@ -166,8 +166,8 @@
       </div>
 
       <!-- Related Resources -->
-      <section class="mt-5 pt-4 border-top">
-        <h4 class="fw-bold text-dark mb-3">Other Resources You Might Find Useful</h4>
+      <section class="mt-5 pt-4 border-top border-secondary border-opacity-25">
+        <h4 class="fw-bold text-white mb-3">Other Resources You Might Find Useful</h4>
         <div class="row" id="detail-related-grid"></div>
       </section>
     </div>
@@ -178,26 +178,26 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content rounded-4 border-0 shadow-lg p-3">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title fw-bold"><i class="bi bi-hand-thumbs-up-fill text-primary"></i> Request Resource</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold text-white"><i class="bi bi-hand-thumbs-up-fill text-primary"></i> Request Resource</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-muted mb-3">
+          <p class="small text-zinc-300 mb-3">
             Send a polite message to the donor. Once accepted, you can coordinate pickup and chat in real-time.
           </p>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small text-dark">Quantity Needed *</label>
+            <label class="form-label fw-bold small text-zinc-200">Quantity Needed *</label>
             <input type="number" id="req-quantity" class="form-control rounded-3" value="1" min="1" max="10">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small text-dark">Message to Donor *</label>
+            <label class="form-label fw-bold small text-zinc-200">Message to Donor *</label>
             <textarea id="req-message" class="form-control rounded-3" rows="3" placeholder="Hello! I could really make good use of this for my studies/family because..."></textarea>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small text-dark">Preferred Pickup Window</label>
+            <label class="form-label fw-bold small text-zinc-200">Preferred Pickup Window</label>
             <select id="req-pickup-time" class="form-select rounded-3">
               <option value="Flexible / Any time">Flexible / Any convenient time</option>
               <option value="Today Evening">Today Evening (5:00 PM - 8:00 PM)</option>
@@ -220,12 +220,12 @@
       <div class="modal-content rounded-4 border-0 shadow-lg p-3">
         <div class="modal-header border-0 pb-0">
           <h5 class="modal-title fw-bold text-danger"><i class="bi bi-flag-fill"></i> Report Resource</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-muted mb-3">Help keep ShareSphere safe, respectful, and genuine.</p>
+          <p class="small text-zinc-300 mb-3">Help keep ShareSphere safe, respectful, and genuine.</p>
           <div class="mb-3">
-            <label class="form-label fw-bold small text-dark">Reason for reporting</label>
+            <label class="form-label fw-bold small text-zinc-200">Reason for reporting</label>
             <select id="report-reason" class="form-select rounded-3">
               <option value="Fake donation">Fake / Misleading donation</option>
               <option value="Inappropriate content">Inappropriate / Harmful content</option>
@@ -235,7 +235,7 @@
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label fw-bold small text-dark">Details</label>
+            <label class="form-label fw-bold small text-zinc-200">Details</label>
             <textarea id="report-note" class="form-control rounded-3" rows="2" placeholder="Optional details for moderator review..."></textarea>
           </div>
           <button class="btn btn-danger w-100 rounded-pill py-2" id="btn-submit-report">

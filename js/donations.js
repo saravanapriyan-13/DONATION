@@ -259,6 +259,9 @@ function validateCurrentStep(step) {
 
   if (step === 4) {
     const locInput = document.getElementById('form-location-name');
+    const latInput = document.getElementById('form-latitude');
+    const lngInput = document.getElementById('form-longitude');
+
     const loc = locInput?.value.trim();
     if (!loc || loc.length < 3) {
       window.ShareSphereUtils.showToast('Please enter your neighborhood area or landmark.', 'warning');
@@ -266,11 +269,21 @@ function validateCurrentStep(step) {
       return false;
     }
     donationFormData.location = loc;
-    if (!donationFormData.latitude || !donationFormData.longitude) {
+
+    // Read manual or captured coordinates
+    let lat = latInput && latInput.value !== '' ? parseFloat(latInput.value) : donationFormData.latitude;
+    let lng = lngInput && lngInput.value !== '' ? parseFloat(lngInput.value) : donationFormData.longitude;
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat === 0 || lng === 0) {
       const userLoc = window.ShareSphereLocation ? window.ShareSphereLocation.getUserLocation() : null;
-      donationFormData.latitude = (userLoc && userLoc.lat) || 12.9716;
-      donationFormData.longitude = (userLoc && userLoc.lng) || 77.5946;
+      lat = (userLoc && Number.isFinite(userLoc.lat)) ? userLoc.lat : 12.9716;
+      lng = (userLoc && Number.isFinite(userLoc.lng)) ? userLoc.lng : 77.5946;
     }
+
+    donationFormData.latitude = lat;
+    donationFormData.longitude = lng;
+    if (latInput) latInput.value = lat.toFixed(6);
+    if (lngInput) lngInput.value = lng.toFixed(6);
     return true;
   }
 
@@ -400,11 +413,74 @@ function setupImageUploader() {
 
 function setupLocationAutofill() {
   const btn = document.getElementById('btn-wizard-gps');
+  const locInput = document.getElementById('form-location-name');
+  const latInput = document.getElementById('form-latitude');
+  const lngInput = document.getElementById('form-longitude');
+  const coordsDisplay = document.getElementById('gps-coords-display');
+
+  // Sync inputs if already present
+  if (latInput && !latInput.value && donationFormData.latitude) {
+    latInput.value = Number(donationFormData.latitude).toFixed(6);
+  }
+  if (lngInput && !lngInput.value && donationFormData.longitude) {
+    lngInput.value = Number(donationFormData.longitude).toFixed(6);
+  }
+
+  // Handle manual coordinate changes
+  if (latInput) {
+    latInput.addEventListener('input', () => {
+      const val = parseFloat(latInput.value);
+      if (Number.isFinite(val) && val >= -90 && val <= 90) {
+        donationFormData.latitude = val;
+        if (coordsDisplay) {
+          coordsDisplay.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i> <b>Manual Coordinates:</b> ${val.toFixed(5)}° N, ${(donationFormData.longitude || 0).toFixed(5)}° E`;
+          coordsDisplay.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  if (lngInput) {
+    lngInput.addEventListener('input', () => {
+      const val = parseFloat(lngInput.value);
+      if (Number.isFinite(val) && val >= -180 && val <= 180) {
+        donationFormData.longitude = val;
+        if (coordsDisplay) {
+          coordsDisplay.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i> <b>Manual Coordinates:</b> ${(donationFormData.latitude || 0).toFixed(5)}° N, ${val.toFixed(5)}° E`;
+          coordsDisplay.style.display = 'block';
+        }
+      }
+    });
+  }
+
+  // Handle neighborhood address blur / geocoding lookup fallback
+  if (locInput) {
+    locInput.addEventListener('blur', async () => {
+      const query = locInput.value.trim();
+      if (query.length >= 3 && window.ShareSphereLocation && typeof window.ShareSphereLocation.geocodeAddress === 'function') {
+        try {
+          const result = await window.ShareSphereLocation.geocodeAddress(query);
+          if (result && Number.isFinite(result.lat) && Number.isFinite(result.lng)) {
+            donationFormData.latitude = result.lat;
+            donationFormData.longitude = result.lng;
+            donationFormData.location = query;
+            if (latInput) latInput.value = result.lat.toFixed(6);
+            if (lngInput) lngInput.value = result.lng.toFixed(6);
+            if (coordsDisplay) {
+              coordsDisplay.innerHTML = `<i class="bi bi-geo-alt-fill text-info me-1"></i> <b>Location Resolved:</b> ${result.lat.toFixed(5)}° N, ${result.lng.toFixed(5)}° E <br><small class="text-zinc-300">${result.displayName || query}</small>`;
+              coordsDisplay.style.display = 'block';
+            }
+          }
+        } catch (_) {}
+      }
+    });
+  }
+
   if (!btn) return;
 
   btn.onclick = async () => {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching Exact GPS & Address...';
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Fetching Exact High-Accuracy GPS...';
     
     try {
       const loc = await window.ShareSphereLocation.requestCurrentPosition();
@@ -412,24 +488,26 @@ function setupLocationAutofill() {
       donationFormData.longitude = loc.lng;
       donationFormData.location = loc.address;
 
-      const locInput = document.getElementById('form-location-name');
       if (locInput) {
         locInput.value = loc.address;
         locInput.style.borderColor = '#10B981';
       }
+      if (latInput) latInput.value = loc.lat.toFixed(6);
+      if (lngInput) lngInput.value = loc.lng.toFixed(6);
 
-      const coordsDisplay = document.getElementById('gps-coords-display');
       if (coordsDisplay) {
         coordsDisplay.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i> <b>Exact Coordinates:</b> ${loc.lat.toFixed(5)}° N, ${loc.lng.toFixed(5)}° E <br><small class="text-emerald-400 opacity-90">${loc.address}</small>`;
         coordsDisplay.style.display = 'block';
       }
 
       btn.disabled = false;
-      btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Exact Location Captured!';
+      btn.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Exact GPS Captured!';
+      window.ShareSphereUtils.showToast('✓ Accurate GPS location captured successfully!', 'success');
     } catch (e) {
       console.warn('GPS location error:', e);
       btn.disabled = false;
       btn.innerHTML = '<i class="bi bi-geo-alt"></i> Auto-Detect My Current Location';
+      window.ShareSphereUtils.showToast('Could not get automatic GPS. You can enter neighborhood or coordinates manually.', 'info');
     }
   };
 }
@@ -499,7 +577,7 @@ async function handlePublishDonation() {
     const donationId = 'don_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
     const newDonation = {
       id: donationId,
-      donorId: user.id || user.uid || 'usr_' + Date.now(),
+      donorId: user.uid || user.id || 'usr_' + Date.now(),
       donorName: user.name || user.displayName || 'Community Member',
       donorEmail: user.email || '',
       donorAvatar: user.avatar || user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
@@ -519,17 +597,18 @@ async function handlePublishDonation() {
       createdAt: new Date().toISOString()
     };
 
-    // Save to shared database (Express server, Spring Boot, and local storage)
+    // Save to shared database (Express server, Firestore, and memory)
     await window.ShareSphereDB.insert('donations', newDonation);
 
-    // Save this donation ID in local donor memory so it ALWAYS appears in My Donations
+    // Clean up legacy device-specific ID storage to prevent cross-account leaks
     try {
-      const myIds = JSON.parse(localStorage.getItem('sharesphere_my_donations_ids') || '[]');
-      if (!myIds.includes(newDonation.id)) {
-        myIds.unshift(newDonation.id);
-        localStorage.setItem('sharesphere_my_donations_ids', JSON.stringify(myIds));
-      }
+      localStorage.removeItem('sharesphere_my_donations_ids');
     } catch (_) {}
+
+    // Force background push to server
+    if (window.ShareSphereDB && typeof window.ShareSphereDB.syncAllFromAPI === 'function') {
+      window.ShareSphereDB.syncAllFromAPI().catch(() => {});
+    }
 
     // Award +50 impact points ONCE
     const currentPoints = (user.points || 0) + 50;
@@ -547,7 +626,7 @@ async function handlePublishDonation() {
       confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
     }
 
-    window.ShareSphereUtils.showToast('🎉 Donation published! Redirecting to My Donations...', 'success');
+    window.ShareSphereUtils.showToast('🎉 Donation published! Broadcasted live to all community members.', 'success');
 
     setTimeout(() => {
       window.location.href = 'donations.html';
@@ -607,10 +686,10 @@ function renderMyDonations(filterStatus) {
   if (!user) {
     container.innerHTML = `
       <div class="col-12 text-center py-5">
-        <div class="empty-state-box p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.75);">
+        <div class="empty-state-box p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.85);">
           <div class="mb-3" style="font-size: 2.5rem;">🔒</div>
           <h4 class="fw-bold text-white mb-2">Sign in to view your donations</h4>
-          <p class="text-muted mb-4">Please log in to manage your listed community items and review requests.</p>
+          <p class="empty-state-text text-zinc-300 mb-4">Please log in to manage your listed community items and review requests.</p>
           <a href="login.html?redirect=donations.html" class="btn btn-primary-custom px-4 py-2">
             <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to My Account
           </a>
@@ -622,36 +701,29 @@ function renderMyDonations(filterStatus) {
 
   const allDonations = window.ShareSphereDB.getCollection('donations');
   const allRequests = window.ShareSphereDB.getCollection('requests');
-  let myDonationIds = [];
-  try {
-    myDonationIds = JSON.parse(localStorage.getItem('sharesphere_my_donations_ids') || '[]');
-  } catch (_) {}
+  const currentUid = String(user.uid || user.id);
 
+  // Strict cross-account filtering: item belongs STRICTLY to the currently logged-in user
   let donations = allDonations.filter(d => {
     if (!d || !d.id) return false;
     // Don't show dummy seed items
     if (d.id.startsWith('don_seed_')) return false;
 
-    const matchId = user.id && (d.donorId === user.id || String(d.donorId) === String(user.id));
-    const matchEmail = user.email && d.donorEmail && (d.donorEmail.toLowerCase() === user.email.toLowerCase());
-    const matchEmailAsId = user.email && (d.donorId === user.email);
-    const matchName = user.name && d.donorName && (d.donorName.trim().toLowerCase() === user.name.trim().toLowerCase());
-    const matchStoredList = myDonationIds.includes(d.id);
-
-    return matchId || matchEmail || matchEmailAsId || matchName || matchStoredList;
+    const donorId = String(d.donorId || '');
+    return donorId === currentUid || (user.id && donorId === String(user.id)) || (user.uid && donorId === String(user.uid));
   });
 
   if (filterStatus !== 'All') {
-    donations = donations.filter(d => d.status === filterStatus);
+    donations = donations.filter(d => (d.status || '').toLowerCase() === filterStatus.toLowerCase());
   }
 
   if (donations.length === 0) {
     container.innerHTML = `
       <div class="col-12">
-        <div class="empty-state-box p-5 rounded-4 text-center border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.75);">
+        <div class="empty-state-box p-5 rounded-4 text-center border border-secondary border-opacity-25" style="background: rgba(18, 20, 29, 0.85);">
           <span class="empty-state-icon" style="font-size: 3rem;">📦</span>
           <h4 class="empty-state-title text-white mt-3 mb-2">No donations in this view</h4>
-          <p class="empty-state-text text-muted mb-4">Your donated resources will appear here once you list them.</p>
+          <p class="empty-state-text text-zinc-300 mb-4">Your donated resources will appear here once you list them.</p>
           <a href="donate.html" class="btn btn-primary-custom px-4 py-2">
             <i class="bi bi-plus-circle me-1"></i> Donate an Item Now
           </a>
@@ -682,12 +754,12 @@ function renderMyDonations(filterStatus) {
                   <span class="status-badge-overlay ${item.status.toLowerCase()} position-static">
                     ${item.status}
                   </span>
-                  <small class="text-muted">${window.ShareSphereUtils.timeAgo(item.createdAt)}</small>
+                  <small class="text-zinc-300 font-medium">${window.ShareSphereUtils.timeAgo(item.createdAt)}</small>
                 </div>
                 <h6 class="fw-bold text-white mb-1">${item.title}</h6>
-                <p class="small text-muted text-truncate mb-2">${item.description}</p>
-                <div class="small text-muted mb-2">
-                  <i class="bi bi-geo-alt text-emerald-400"></i> ${item.location} • Qty: ${item.quantity}
+                <p class="small text-zinc-300 text-truncate mb-2">${item.description}</p>
+                <div class="small text-zinc-300 mb-2">
+                  <i class="bi bi-geo-alt-fill text-emerald-400"></i> ${item.location} • Qty: ${item.quantity}
                 </div>
               </div>
 
@@ -697,7 +769,7 @@ function renderMyDonations(filterStatus) {
                     <i class="bi bi-people-fill"></i> ${incomingReqs.length} ${incomingReqs.length === 1 ? 'Request' : 'Requests'} Received
                   </button>
                 ` : `
-                  <div class="small text-muted fst-italic mb-2">No requests received yet</div>
+                  <div class="small text-zinc-400 fst-italic mb-2">No requests received yet</div>
                 `}
 
                 <div class="d-flex gap-2">
@@ -734,19 +806,19 @@ window.openDonorRequestsModal = (donationId) => {
   document.getElementById('modal-donation-title').textContent = donation.title;
 
   container.innerHTML = requests.map(req => `
-    <div class="card p-3 border rounded-3 mb-3 bg-light">
+    <div class="card p-3 border rounded-3 mb-3" style="background: rgba(24, 28, 44, 0.95); border-color: rgba(255,255,255,0.12) !important;">
       <div class="d-flex align-items-center justify-content-between mb-2">
         <div class="d-flex align-items-center gap-2">
           <img src="${req.requesterAvatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
           <div>
-            <div class="fw-bold small">${req.requesterName}</div>
-            <div class="text-muted" style="font-size: 0.72rem;">${window.ShareSphereUtils.timeAgo(req.createdAt)}</div>
+            <div class="fw-bold small text-white">${req.requesterName}</div>
+            <div class="text-zinc-400" style="font-size: 0.72rem;">${window.ShareSphereUtils.timeAgo(req.createdAt)}</div>
           </div>
         </div>
         <span class="badge ${req.status === 'Accepted' ? 'bg-success' : req.status === 'Requested' ? 'bg-warning text-dark' : 'bg-secondary'}">${req.status}</span>
       </div>
-      <p class="small text-muted mb-2">"${req.message}"</p>
-      <div class="small text-muted mb-2"><b>Quantity needed:</b> ${req.quantity}</div>
+      <p class="small text-zinc-200 mb-2">"${req.message}"</p>
+      <div class="small text-zinc-300 mb-2"><b>Quantity needed:</b> ${req.quantity}</div>
       ${req.status === 'Requested' ? `
         <div class="d-flex gap-2">
           <button class="btn btn-sm btn-success flex-grow-1" onclick="handleAcceptRequest('${req.id}', '${donationId}')">

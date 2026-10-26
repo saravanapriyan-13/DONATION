@@ -207,7 +207,7 @@ function renderExploreResources() {
   }
 
   if (items.length === 0) {
-    container.innerHTML = '<div style="grid-column:1/-1;"><div class="explore-empty p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 22, 36, 0.85);"><span class="explore-empty-icon" style="font-size:3.5rem;">📦</span><h4 class="fw-bold text-white mb-2">No donations match your filter</h4><p class="text-muted mb-4">Be the first to donate an item or try clearing your filters.</p><a href="donate.html" class="btn btn-primary-custom px-4 py-2 me-2"><i class="bi bi-plus-circle me-1"></i> Donate an Item</a><button class="btn btn-outline-light px-3 py-2" onclick="resetExploreFilters()">Reset Filters</button></div></div>';
+    container.innerHTML = '<div style="grid-column:1/-1;"><div class="explore-empty p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 22, 36, 0.85);"><span class="explore-empty-icon" style="font-size:3.5rem;">📦</span><h4 class="fw-bold text-white mb-2">No donations match your filter</h4><p class="text-zinc-300 mb-4">Be the first to donate an item or try clearing your filters.</p><a href="donate.html" class="btn btn-primary-custom px-4 py-2 me-2"><i class="bi bi-plus-circle me-1"></i> Donate an Item</a><button class="btn btn-outline-light px-3 py-2" onclick="resetExploreFilters()">Reset Filters</button></div></div>';
     return;
   }
 
@@ -244,7 +244,7 @@ function renderProductCard(item, userLoc) {
   const timeAgo = window.ShareSphereUtils.timeAgo(item.createdAt);
 
   const currentUser = window.ShareSphereAuth ? window.ShareSphereAuth.getCurrentUser() : null;
-  const isMyListing = currentUser && item.donorId && currentUser.id === item.donorId;
+  const isMyListing = currentUser && item.donorId && (currentUser.id === item.donorId || (currentUser.uid && currentUser.uid === item.donorId));
 
   return '<div class="product-card">' +
     '<div class="product-card-img-wrap">' +
@@ -256,28 +256,28 @@ function renderProductCard(item, userLoc) {
       '</button>' +
     '</div>' +
     '<div class="product-card-body">' +
-      '<div class="product-card-title" onclick="window.location.href=\'donation-details.html?id=' + item.id + '\'">' + (item.title || 'Item') + '</div>' +
+      '<div class="product-card-title text-white font-bold" onclick="window.location.href=\'donation-details.html?id=' + item.id + '\'">' + (item.title || 'Item') + '</div>' +
       '<div class="product-card-meta d-flex align-items-center gap-2 flex-wrap">' +
         '<span class="cond-badge">' + (item.condition || '') + '</span>' +
         '<span class="status-chip ' + statusClass + '">' + (item.status || '') + '</span>' +
-        (isMyListing ? '<span class="badge bg-secondary-subtle text-secondary" style="font-size:0.65rem;">Your Item</span>' : '') +
-        (item.quantity > 1 ? '<span style="font-size:0.7rem;color:#666;">Qty: ' + item.quantity + '</span>' : '') +
+        (isMyListing ? '<span class="badge bg-secondary-subtle text-light border border-secondary" style="font-size:0.68rem;">Your Item</span>' : '') +
+        (item.quantity > 1 ? '<span style="font-size:0.75rem;color:#E2E8F0;font-weight:600;">Qty: ' + item.quantity + '</span>' : '') +
       '</div>' +
-      '<div class="product-card-location mb-2">' +
-        '<i class="bi bi-geo-alt-fill"></i> ' + (item.location || 'Community Area') +
-        (distStr ? ' &bull; <span style="color:var(--primary);font-weight:600;">' + distStr + '</span>' : '') +
-        '<span style="color:#aaa;margin-left:6px;font-size:0.7rem;">' + timeAgo + '</span>' +
+      '<div class="product-card-location mb-2 text-zinc-300">' +
+        '<i class="bi bi-geo-alt-fill text-emerald-400"></i> ' + (item.location || 'Community Area') +
+        (distStr ? ' &bull; <span style="color:#10B981;font-weight:700;">' + distStr + '</span>' : '') +
+        '<span style="color:#CBD5E1;margin-left:6px;font-size:0.72rem;font-weight:500;">' + timeAgo + '</span>' +
       '</div>' +
       '<div class="product-card-donor">' +
         '<img src="' + (item.donorAvatar || 'https://i.pravatar.cc/150?img=1') + '" alt="' + (item.donorName || '') + '" onerror="this.src=\'https://i.pravatar.cc/150?img=1\'">' +
         '<div>' +
-          '<div class="product-card-donor-name">' + (item.donorName || 'Community Donor') + (isMyListing ? ' (You)' : '') + '</div>' +
-          '<div class="product-card-rating" style="color:#f9a825;font-size:0.68rem;">' + stars + ' ' + (item.donorRating || '5.0') + '</div>' +
+          '<div class="product-card-donor-name text-white font-medium">' + (item.donorName || 'Community Donor') + (isMyListing ? ' (You)' : '') + '</div>' +
+          '<div class="product-card-rating" style="color:#FBBF24;font-size:0.72rem;font-weight:600;">' + stars + ' ' + (item.donorRating || '5.0') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>' +
     (isMyListing 
-      ? '<a href="donations.html" class="product-card-btn" style="background:#475569;letter-spacing:0.3px;"><i class="bi bi-box2-heart"></i> YOUR LISTING &bull; MANAGE</a>'
+      ? '<a href="donations.html" class="product-card-btn" style="background:#334155;color:#F8FAFC;letter-spacing:0.3px;font-weight:600;"><i class="bi bi-box2-heart"></i> YOUR LISTING &bull; MANAGE</a>'
       : '<a href="donation-details.html?id=' + item.id + '" class="product-card-btn primary-btn">VIEW &amp; REQUEST &rarr;</a>') +
   '</div>';
 }

@@ -78,14 +78,14 @@ app.get('/api/health', (req, res) => {
 });
 
 // GET all items in a collection (Shared across all users)
-app.get('/api/data/:collection', (req, res) => {
+app.get(['/api/data/:collection', '/api/:collection(donations|requests|users|notifications|reports)'], (req, res) => {
   const collectionName = req.params.collection;
   const items = readCollection(collectionName);
   res.json({ success: true, collection: collectionName, count: items.length, data: items });
 });
 
 // POST add an item to a collection
-app.post('/api/data/:collection', (req, res) => {
+app.post(['/api/data/:collection', '/api/:collection(donations|requests|users|notifications|reports)'], (req, res) => {
   const collectionName = req.params.collection;
   const item = req.body;
 
@@ -116,7 +116,7 @@ app.post('/api/data/:collection', (req, res) => {
 });
 
 // PUT update an item in a collection
-app.put('/api/data/:collection/:id', (req, res) => {
+app.put(['/api/data/:collection/:id', '/api/:collection(donations|requests|users|notifications|reports)/:id'], (req, res) => {
   const collectionName = req.params.collection;
   const id = req.params.id;
   const updates = req.body;
@@ -141,7 +141,7 @@ app.put('/api/data/:collection/:id', (req, res) => {
 });
 
 // DELETE remove an item from a collection
-app.delete('/api/data/:collection/:id', (req, res) => {
+app.delete(['/api/data/:collection/:id', '/api/:collection(donations|requests|users|notifications|reports)/:id'], (req, res) => {
   const collectionName = req.params.collection;
   const id = req.params.id;
 
